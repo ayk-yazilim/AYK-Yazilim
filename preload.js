@@ -1,0 +1,8 @@
+const { contextBridge, ipcRenderer } = require('electron');
+contextBridge.exposeInMainWorld('ayk', {
+  getVersion: () => ipcRenderer.invoke('app:get-version'),
+  checkForUpdates: () => ipcRenderer.invoke('update:check'),
+  getAutoStart: () => ipcRenderer.invoke('app:get-auto-start'),
+  setAutoStart: (enabled) => ipcRenderer.invoke('app:set-auto-start', enabled),
+  createDesktopShortcut: () => ipcRenderer.invoke('app:create-desktop-shortcut')
+});

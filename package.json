@@ -1,0 +1,61 @@
+{
+  "name": "ayk-muhasebe-yardimcisi",
+  "version": "3.0.0",
+  "description": "Muhasebecinin günlük işleri için akıllı araç kutusu",
+  "main": "main.js",
+  "author": "AYK Yazılım",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "build:win": "electron-builder --win --x64 --publish never",
+    "release": "electron-builder --win --x64 --publish always"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.9"
+  },
+  "devDependencies": {
+    "electron": "^37.2.5",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.aykyazilim.muhasebeyardimcisi",
+    "productName": "AYK Muhasebe Yardımcısı",
+    "artifactName": "AYK-Muhasebe-Yardimcisi-${version}-${arch}.${ext}",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "src/**/*",
+      "Assets/**/*",
+      "Modules/**/*",
+      "AYK.ico",
+      "AYK-Logo.png",
+      "package.json"
+    ],
+    "win": {
+      "icon": "AYK.ico",
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "ayk-yazilim",
+        "repo": "AYK-Yazilim",
+        "releaseType": "release"
+      }
+    ]
+  }
+}

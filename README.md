@@ -1,37 +1,39 @@
-# AYK Muhasebe Yardımcısı
+# AYK Muhasebe Yardımcısı V3.0
 
-Muhasebecilerin günlük işlemleri için taşınabilir Windows yardımcı uygulaması.
+Electron tabanlı Windows masaüstü uygulaması. HTA, VBS ve ayrı PowerShell güncelleyicisi kullanılmaz.
 
-## Sürüm
+## NPM kullanmadan EXE oluşturma
 
-**V2.2.0 – Excel Formül Merkezi**
+Bu projede yerel bilgisayarda Node.js veya npm çalıştırmak gerekmez. Derleme GitHub Actions sunucusunda yapılır.
 
-## Başlatma
+1. Proje dosyalarını GitHub deposuna yükleyin.
+2. GitHub'da **Actions** sekmesini açın.
+3. Soldan **Windows EXE Derle** iş akışını seçin.
+4. **Run workflow** düğmesine basın.
+5. İşlem yeşil tikle tamamlanınca çalışmayı açın.
+6. Sayfanın altındaki **Artifacts** bölümünden `AYK-Muhasebe-Yardimcisi-Windows-V3` paketini indirin.
 
-1. Tüm dosya ve klasörleri aynı konumda tutun.
-2. `AYK-Launcher.vbs` dosyasını açın.
-3. Alternatif olarak `AYK-Muhasebe-Yardimcisi.hta` doğrudan çalıştırılabilir.
+Artifact içinde kurulum ve portable Windows EXE dosyaları bulunur.
 
-## Özellikler
+## Resmî sürüm yayınlama
 
-- KKEG, KDV, stopaj ve tevkifat hesaplayıcıları
-- Yansıtma ve kiralık araç hesaplayıcıları
-- Ünvan Düzeltici ve Kısaltma Yöneticisi
-- Excel Formül Merkezi: arama, kategori filtresi ve tek tıkla kopyalama
-- Registry tabanlı ayarlar
-- Taşınabilir çalışma; kurulum ve yönetici yetkisi gerektirmez
+Yeni sürüm yayınlarken `package.json` içindeki sürüm numarasını yükseltin. Örneğin:
 
-© 2026 AYK Yazılım. Tüm hakları saklıdır.
-
-
-## Otomatik Güncelleme
-
-Program `AYK-Launcher.vbs` ile açıldığında GitHub Releases üzerindeki son sürümü kontrol eder. Yeni sürüm bulunduğunda kullanıcıdan onay alır, Release içine eklenen ZIP dosyasını indirir, dosyaları günceller ve uygulamayı yeniden başlatır.
-
-Release varlığı için önerilen dosya adı:
-
-```text
-AYK-Muhasebe-Yardimcisi-Guncelleme.zip
+```json
+"version": "3.0.1"
 ```
 
-İlk otomatik güncelleme altyapısı V2.2.0 ile gelir. V2.1.0 kullanıcılarının V2.2.0 paketini bir kez elle kurması gerekir.
+Değişiklikleri GitHub'a gönderdikten sonra aynı sürüm için `v3.0.1` etiketi oluşturup gönderin. **Windows Release Yayınla** iş akışı otomatik çalışır ve EXE dosyalarını GitHub Releases bölümüne ekler.
+
+## Proje yapısı
+
+- `main.js`: Electron ana süreç
+- `preload.js`: Güvenli masaüstü API köprüsü
+- `src/`: Arayüz ve uygulama kodları
+- `Assets/`: Stil ve görseller
+- `Modules/`: Modül tanımları
+- `.github/workflows/`: GitHub üzerinde otomatik EXE derleme ve yayınlama
+
+## Güvenlik notu
+
+Windows kod imzalama sertifikası henüz eklenmediği için ilk çalıştırmada Windows SmartScreen uyarısı gösterebilir. Bu durum derleme hatası değildir.

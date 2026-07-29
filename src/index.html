@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>AYK Muhasebe Yardımcısı - V3.0.0</title>
+
+<link rel="stylesheet" type="text/css" href="../Assets/Styles/main.css">
+<script language="javascript" src="app.js"></script>
+</head>
+<body onload="resizeWindow();" onkeydown="keyHandler();">
+<div class="scroll-area"><div class="wrap"><div class="card">
+  <div class="header"><h1>AYK Muhasebe Yardımcısı</h1><div class="version">Sürüm V3.0.0</div></div>
+  <div class="update-status" style="margin:10px 18px;">V3.0 Electron masaüstü altyapısı etkin.</div>
+  <div class="app-layout">
+  <div id="sidebar" class="sidebar">
+    <div class="sidebar-top"><button id="menuToggle" class="menu-toggle" onclick="toggleSidebar()" title="Menüyü gizle veya aç">«</button></div>
+    <button id="tabDashboard" class="tab-button active" onclick="showTab('dashboardPage','tabDashboard')"><span class="menu-icon">⌂</span><span class="menu-label">Dashboard</span></button>
+    <button id="tabKkeg" class="tab-button" onclick="showTab('kkegPage','tabKkeg')"><span class="menu-icon">🧮</span><span class="menu-label">KKEG</span></button>
+    <button id="tabYansitma" class="tab-button" onclick="showTab('yansitmaPage','tabYansitma')"><span class="menu-icon">↔</span><span class="menu-label">Yansıtma</span></button>
+    <button id="tabKiralik" class="tab-button" onclick="showTab('kiralikPage','tabKiralik')"><span class="menu-icon">🚗</span><span class="menu-label">Kiralık Araç</span></button>
+    <button id="tabUnvan" class="tab-button" onclick="showTab('unvanPage','tabUnvan')"><span class="menu-icon">✎</span><span class="menu-label">Ünvan Düzeltici</span></button>
+    <button id="tabKdv" class="tab-button" onclick="showTab('kdvPage','tabKdv')"><span class="menu-icon">%</span><span class="menu-label">KDV Yardımcısı</span></button>
+    <button id="tabStopaj" class="tab-button" onclick="showTab('stopajPage','tabStopaj')"><span class="menu-icon">₺</span><span class="menu-label">Stopaj Yardımcısı</span></button>
+    <button id="tabTevkifat" class="tab-button" onclick="showTab('tevkifatPage','tabTevkifat')"><span class="menu-icon">⅒</span><span class="menu-label">Tevkifat Yardımcısı</span></button>
+    <button id="tabExcel" class="tab-button" onclick="showTab('excelPage','tabExcel')"><span class="menu-icon">▦</span><span class="menu-label">Excel Merkezi</span></button>
+    <button id="tabGuncelleme" class="tab-button" onclick="showTab('guncellemePage','tabGuncelleme')"><span class="menu-icon">↻</span><span class="menu-label">Güncellemeler</span></button>
+    <button id="tabAyar" class="tab-button" onclick="showTab('ayarPage','tabAyar')"><span class="menu-icon">⚙</span><span class="menu-label">Ayarlar</span></button>
+  </div>
+  <div class="content">
+
+  <div id="dashboardPage" class="tab-page active">
+    <div class="panel"><h2>AYK Dashboard</h2>
+      <div class="dashboard-grid">
+        <button class="dashboard-card" onclick="showTab('kkegPage','tabKkeg')"><b>🧮 KKEG</b><span>Hızlı hesaplama</span></button>
+        <button class="dashboard-card" onclick="showTab('unvanPage','tabUnvan')"><b>✎ Ünvan Düzeltici</b><span>Toplu ünvan düzenleme</span></button>
+        <button class="dashboard-card" onclick="showTab('kdvPage','tabKdv')"><b>% KDV</b><span>Matrah ve KDV hesapla</span></button>
+        <button class="dashboard-card" onclick="showTab('excelPage','tabExcel')"><b>▦ Excel Merkezi</b><span>Hazır formül ve örnekler</span></button>
+        <button class="dashboard-card" onclick="showTab('guncellemePage','tabGuncelleme')"><b>↻ Güncellemeler</b><span>Sürüm geçmişi</span></button>
+      </div>
+      <div class="update-status">V3.0.0 Electron altyapısı etkin. Güncellemeler uygulama içinden kontrol edilir.</div>
+    </div>
+  </div>
+
+  <div id="kkegPage" class="tab-page">
+    <div class="panel"><h2>KKEG Hesaplayıcı</h2><label>Fatura Tutarı (KDV Dahil)</label><div class="amount-row"><input id="tutar" type="text" onkeyup="calculateKKEG()"><span class="tl">TL</span></div>
+      <div class="rates"><label class="rate"><input type="radio" name="kdv" value="0.20" onclick="calculateKKEG()">%20</label><label class="rate"><input type="radio" name="kdv" value="0.10" onclick="calculateKKEG()">%10</label><label class="rate"><input type="radio" name="kdv" value="0.01" onclick="calculateKKEG()">%1</label></div>
+      <div class="buttons"><button class="primary" onclick="calculateKKEG()">Hesapla</button><button class="secondary" onclick="copyKKEG()">Kopyala</button><button class="secondary" onclick="clearKKEG()">Temizle</button></div>
+      <div class="result-grid"><div class="result"><div class="name">%30 KKEG</div><div id="kkeg" class="value">0,00 TL</div></div><div class="result"><div class="name">%70 Kabul Edilen</div><div id="accepted" class="value">0,00 TL</div></div><div class="result"><div class="name">Matrah</div><div id="base" class="value">0,00 TL</div></div><div class="result"><div class="name">İndirilecek KDV</div><div id="vat" class="value">0,00 TL</div></div></div>
+    </div>
+  </div>
+
+  <div id="yansitmaPage" class="tab-page">
+    <div class="panel"><h2>Yansıtma Hesaplayıcı 0,2-0,25</h2><label>Ana Tutar</label><div class="amount-row"><input id="yansitmaTutar" type="text" onkeyup="calculateYansitma()"><span class="tl">TL</span></div>
+      <div class="buttons"><button class="primary" onclick="calculateYansitma()">Hesapla</button><button class="secondary" onclick="copyYansitma()">Kopyala</button><button class="secondary" onclick="clearYansitma()">Temizle</button></div>
+      <div id="atlasLabel" class="section-title">Atlas → EMR (%0,20)</div><div class="result-grid"><div class="result"><div class="name">Komisyon</div><div id="atlasKomisyon" class="value">0,00 TL</div></div><div class="result"><div class="name">Kesilecek Fatura</div><div id="atlasToplam" class="value">0,00 TL</div></div></div>
+      <div id="ovvoLabel" class="section-title">EMR → OVVO (%0,25)</div><div class="result-grid"><div class="result"><div class="name">Komisyon</div><div id="ovvoKomisyon" class="value">0,00 TL</div></div><div class="result"><div class="name">Kesilecek Fatura</div><div id="ovvoToplam" class="value">0,00 TL</div></div></div>
+      <div class="note">Her iki hesaplama da girilen aynı ana tutar üzerinden yapılır.</div>
+    </div>
+  </div>
+
+  <div id="kiralikPage" class="tab-page">
+    <div class="panel"><h2>Kiralık Binek Araç KKEG</h2><label>KDV Hariç Aylık Kira Tutarı</label><div class="amount-row"><input id="kiralikTutar" type="text" onkeyup="calculateKiralik()"><span class="tl">TL</span></div>
+      <div class="buttons"><button class="primary" onclick="calculateKiralik()">Hesapla</button><button class="secondary" onclick="copyKiralik()">Kopyala</button><button class="secondary" onclick="clearKiralik()">Temizle</button></div>
+      <div class="result-grid"><div class="result full"><div class="name">Aylık Gider Sınırı</div><div id="kiralikLimit" class="value">46.000,00 TL</div></div><div class="result"><div class="name">Gider Yazılabilir</div><div id="kiralikAccepted" class="value">0,00 TL</div></div><div class="result"><div class="name">KKEG</div><div id="kiralikKkeg" class="value">0,00 TL</div></div></div>
+      <div class="note">Yıllık limit değiştiğinde Ayarlar sekmesinden tutarı güncelleyebilirsin.</div>
+    </div>
+  </div>
+
+
+  <div id="unvanPage" class="tab-page">
+    <div class="panel"><h2>Ünvan Düzeltici</h2><div class="section-title">Çıktı Formatı</div>
+      <label class="choice-row"><input type="radio" name="unvanMode" value="upper" checked onclick="fixTitles()">TAMAMI BÜYÜK HARF</label>
+      <label class="choice-row"><input type="radio" name="unvanMode" value="title" onclick="fixTitles()">Baş Harfler Büyük</label>
+      <label>Firma Ünvanı veya Excel'den Toplu Liste</label><textarea id="unvanInput" onkeyup="fixTitles()" placeholder="ABC YATIRIM SANAYİ TİCARET VE LİMİTED ŞİRKETİ"></textarea>
+      <div class="buttons"><button class="primary" onclick="fixTitles()">Düzelt</button><button class="secondary" onclick="copyTitles()">Kopyala</button><button class="secondary" onclick="clearTitles()">Temizle</button></div>
+      <div class="section-title">Düzeltilmiş Ünvan</div><div id="unvanOutput" class="output-box"></div><div class="note">Her satır ayrı ünvan olarak işlenir. Varsayılan çıktı: ABC YATIRIM SAN.TİC. VE LTD.ŞTİ.</div>
+      <div class="dictionary-box"><div class="section-title" style="margin-top:0">Kısaltma Yöneticisi</div>
+        <div class="dictionary-row"><div class="dictionary-field"><label>Kelime</label><input id="dictWord" type="text" placeholder="MÜTEAHHİTLİK"></div><div class="dictionary-field"><label>Kısaltma</label><input id="dictAbbr" type="text" placeholder="MÜT."></div></div>
+        <div class="buttons"><button id="dictSave" class="primary" onclick="addOrUpdateAbbreviation()">Ekle</button><button class="secondary" onclick="cancelAbbreviationEdit()">Vazgeç</button></div>
+        <label>Ara</label><input id="dictSearch" type="text" onkeyup="renderAbbreviationList()" placeholder="Kelime veya kısaltma ara">
+        <div id="dictionaryList" class="dictionary-list"></div><div id="dictStats" class="stats"></div>
+        <div class="note">Buraya eklediğin kayıtlar hazır sözlüğün önüne geçer ve Windows kullanıcı hesabında saklanır.</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="kdvPage" class="tab-page"><div class="panel"><h2>KDV Yardımcısı</h2><label>Girilen Tutarın Türü</label><select id="kdvMode" onchange="calculateKdv()"><option value="base">KDV Hariç Matrah</option><option value="total">KDV Dahil Tutar</option><option value="vat">Yalnızca KDV Tutarı</option></select><label style="margin-top:9px">Tutar</label><div class="amount-row"><input id="kdvInput" type="text" onkeyup="calculateKdv()"><span class="tl">TL</span></div><label style="margin-top:9px">KDV Oranı</label><select id="kdvRate" onchange="calculateKdv()"><option value="20">%20</option><option value="10">%10</option><option value="1">%1</option></select><div class="buttons"><button class="primary" onclick="calculateKdv()">Hesapla</button><button class="secondary" onclick="copyKdv()">Kopyala</button><button class="secondary" onclick="clearKdv()">Temizle</button></div><div class="result-grid"><div class="result"><div class="name">Matrah</div><div id="kdvBase" class="value">0,00 TL</div></div><div class="result"><div class="name">KDV</div><div id="kdvAmount" class="value">0,00 TL</div></div><div class="result full"><div class="name">KDV Dahil Toplam</div><div id="kdvTotal" class="value">0,00 TL</div></div></div></div></div>
+
+  <div id="stopajPage" class="tab-page"><div class="panel"><h2>Stopaj Yardımcısı</h2><label>Brüt Tutar</label><div class="amount-row"><input id="stopajInput" type="text" onkeyup="calculateStopaj()"><span class="tl">TL</span></div><label style="margin-top:9px">Stopaj Oranı</label><select id="stopajRate" onchange="calculateStopaj()"><option value="20">%20</option><option value="15">%15</option><option value="10">%10</option><option value="5">%5</option><option value="3">%3</option><option value="2">%2</option><option value="1">%1</option></select><div class="buttons"><button class="primary" onclick="calculateStopaj()">Hesapla</button><button class="secondary" onclick="copyStopaj()">Kopyala</button><button class="secondary" onclick="clearStopaj()">Temizle</button></div><div class="result-grid"><div class="result"><div class="name">Brüt Tutar</div><div id="stopajGross" class="value">0,00 TL</div></div><div class="result"><div class="name">Stopaj</div><div id="stopajAmount" class="value">0,00 TL</div></div><div class="result full"><div class="name">Net Ödenecek</div><div id="stopajNet" class="value">0,00 TL</div></div></div><div class="note">İşlem türüne uygun stopaj oranını kullanıcı seçer.</div></div></div>
+
+  <div id="tevkifatPage" class="tab-page"><div class="panel"><h2>KDV Tevkifat Yardımcısı</h2><label>KDV Hariç Matrah</label><div class="amount-row"><input id="tevkifatInput" type="text" onkeyup="calculateTevkifat()"><span class="tl">TL</span></div><div class="helper-grid"><div class="helper-col"><label>KDV Oranı</label><select id="tevkifatVat" onchange="calculateTevkifat()"><option value="20">%20</option><option value="10">%10</option><option value="1">%1</option></select></div><div class="helper-col"><label>Tevkifat Oranı</label><select id="tevkifatRate" onchange="calculateTevkifat()"><option value="2">2/10</option><option value="3">3/10</option><option value="4">4/10</option><option value="5" selected>5/10</option><option value="7">7/10</option><option value="9">9/10</option><option value="10">10/10</option></select></div></div><div class="buttons"><button class="primary" onclick="calculateTevkifat()">Hesapla</button><button class="secondary" onclick="copyTevkifat()">Kopyala</button><button class="secondary" onclick="clearTevkifat()">Temizle</button></div><div class="result-grid"><div class="result"><div class="name">Hesaplanan KDV</div><div id="tevkifatVatAmount" class="value">0,00 TL</div></div><div class="result"><div class="name">Tevkif Edilen KDV</div><div id="tevkifatHeld" class="value">0,00 TL</div></div><div class="result"><div class="name">Satıcıya Ödenecek KDV</div><div id="tevkifatPayableVat" class="value">0,00 TL</div></div><div class="result"><div class="name">Fatura Genel Toplamı</div><div id="tevkifatInvoice" class="value">0,00 TL</div></div><div class="result full"><div class="name">Tahsil Edilecek Tutar</div><div id="tevkifatCollection" class="value">0,00 TL</div></div></div><div class="note">Tevkifat oranını işlem türüne göre seç. Araç yalnızca matematiksel hesaplama yapar.</div></div></div>
+
+  
+
+  <div id="excelPage" class="tab-page">
+    <div class="panel"><h2>Excel Formül Merkezi</h2>
+      <div class="excel-toolbar">
+        <div class="excel-search"><label>Formül Ara</label><input id="excelSearch" type="text" onkeyup="renderExcelFormulas()" placeholder="Örn: DÜŞEYARA, tarih, KDV"></div>
+        <div class="excel-category"><label>Kategori</label><select id="excelCategory" onchange="renderExcelFormulas()"><option value="Tümü">Tümü</option><option value="Muhasebe">Muhasebe</option><option value="Arama">Arama</option><option value="Mantıksal">Mantıksal</option><option value="Toplama">Toplama</option><option value="Metin">Metin</option><option value="Tarih">Tarih</option><option value="Temizleme">Temizleme</option></select></div>
+      </div>
+      <div class="excel-summary"><span id="excelCount">0 formül</span><button class="mini-button" onclick="clearExcelFilters()">Filtreyi Temizle</button></div>
+      <div id="excelFormulaList" class="formula-list"></div>
+      <div class="note">Formüller Türkçe Excel söz dizimine göre hazırlanmıştır. Hücre adreslerini kendi çalışma sayfana göre değiştir.</div>
+    </div>
+  </div>
+
+<div id="guncellemePage" class="tab-page">
+  <div class="panel">
+    <h2>Güncellemeler</h2>
+    <div class="update-card">
+      <div class="update-head"><div><div class="update-version">V3.0.0 GitHub Otomatik Güncelleme</div><div class="update-date">29.07.2026</div></div><span class="badge new">GÜNCEL</span></div>
+      <div class="update-item"><span class="badge new">Yeni</span>Dashboard eklendi.</div>
+      <div class="update-item"><span class="badge new">Yeni</span>Core, Modules ve Assets klasör yapısı oluşturuldu.</div>
+      <div class="update-item"><span class="badge improve">İyileştirme</span>JavaScript çekirdeği ve tema dosyaları HTA içinden ayrıldı.</div>
+      <div class="update-item"><span class="badge fix">Düzeltme</span>Mevcut hesaplayıcılar ve Registry ayarları korundu.</div>
+    </div>
+    <div class="update-card"><div class="update-head"><div class="update-version">V1.5</div></div>
+      <div class="update-item"><span class="badge new">Yeni</span>Manuel kısaltma ekleme, düzenleme ve silme.</div>
+      <div class="update-item"><span class="badge new">Yeni</span>Kullanıcı kısaltmalarının Registry'de saklanması.</div>
+    </div>
+    <div class="update-card"><div class="update-head"><div class="update-version">V1.4</div></div>
+      <div class="update-item"><span class="badge fix">Düzeltme</span>Ayarlar Registry sistemine taşındı.</div>
+      <div class="update-item"><span class="badge fix">Düzeltme</span>Uygulama simgesi yeniden paketlendi.</div>
+    </div>
+    <div class="buttons"><button class="primary" onclick="runUpdater()">Güncellemeyi Kontrol Et</button></div>
+    <div class="update-status">Güncelleme altyapısı hazır. Otomatik indirme için yayın dosyalarının internette erişilebilen bir sunucuya veya GitHub Releases alanına yüklenmesi gerekir.</div>
+  </div>
+</div>
+
+<div id="ayarPage" class="tab-page">
+    <div class="panel"><h2>Ayarlar</h2>
+      <label>Kiralık Binek Araç Aylık Limiti</label><div class="amount-row"><input id="settingLimit" type="text"><span class="tl">TL</span></div>
+      <div class="section-title">Yansıtma Oranları</div><label>Atlas → EMR Oranı (%)</label><input id="settingAtlas" type="text"><label style="margin-top:9px">EMR → OVVO Oranı (%)</label><input id="settingOvvo" type="text">
+      <div class="section-title">Varsayılan KDV</div><select id="settingVat"><option value="20">%20</option><option value="10">%10</option><option value="1">%1</option></select>
+      <div class="section-title">Windows ve Kısayol</div>
+      <label class="choice-row"><input id="autoStart" type="checkbox" onclick="setAutoStart(this.checked)"> Windows açıldığında AYK otomatik başlasın</label>
+      <div class="buttons"><button class="secondary" onclick="createDesktopShortcut()">Masaüstü Kısayolu Oluştur</button></div>
+      <div id="startupSaved" class="saved"></div>
+      <div class="buttons"><button class="primary" onclick="saveSettings()">Ayarları Kaydet</button><button class="danger" onclick="resetSettings()">Varsayılana Dön</button></div><div id="saved" class="saved">Ayarlar kaydedildi.</div>
+      <div class="note">Program klasörünü kalıcı bir konuma çıkardıktan sonra masaüstü kısayolunu ve otomatik başlatmayı etkinleştir. Klasörü sonradan taşırsan kısayolları yeniden oluşturmalısın.</div>
+    </div>
+  </div>
+  </div></div>
+  <div class="footer">© 2026 AYK Yazılım</div>
+</div></div></div>
+</body></html>
