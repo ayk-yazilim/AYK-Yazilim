@@ -1,1 +1,1 @@
-https://example.com/ayk/update.ini
+https://api.github.com/repos/ayk-yazilim/AYK-Yazilim/releases/latest

@@ -1,19 +1,12 @@
 Option Explicit
 
-Dim fso, sh, appDir, appFile, urlFile, updateUrl
+Dim fso, sh, appDir, appFile, updaterFile, command, exitCode
 Set fso = CreateObject("Scripting.FileSystemObject")
 Set sh = CreateObject("WScript.Shell")
 
 appDir = fso.GetParentFolderName(WScript.ScriptFullName)
 appFile = appDir & "\AYK-Muhasebe-Yardimcisi.hta"
-urlFile = appDir & "\update-url.txt"
-updateUrl = ""
-
-If fso.FileExists(urlFile) Then
-    On Error Resume Next
-    updateUrl = Trim(fso.OpenTextFile(urlFile, 1, False).ReadAll)
-    On Error GoTo 0
-End If
+updaterFile = appDir & "\Core\AYK-Updater.ps1"
 
 If Not fso.FileExists(appFile) Then
     MsgBox "AYK-Muhasebe-Yardimcisi.hta bulunamadi." & vbCrLf & _
@@ -22,6 +15,15 @@ If Not fso.FileExists(appFile) Then
     WScript.Quit 1
 End If
 
-' Guncelleme adresi tanimli degilse program yine normal olarak acilir.
-' Gercek sunucu adresi tanimlandiginda guncelleme kontrolu buraya eklenecektir.
+If fso.FileExists(updaterFile) Then
+    command = "powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File """ & updaterFile & """ -AppDir """ & appDir & """"
+    On Error Resume Next
+    exitCode = sh.Run(command, 0, True)
+    If Err.Number = 0 And exitCode = 10 Then
+        WScript.Quit 0
+    End If
+    Err.Clear
+    On Error GoTo 0
+End If
+
 sh.Run "mshta.exe """ & appFile & """", 1, False

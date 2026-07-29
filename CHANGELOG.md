@@ -1,4 +1,12 @@
-# Değişiklik Geçmişi
+# Değişiklik Günlüğü
+
+## V2.2.0 - GitHub Otomatik Güncelleme
+
+- GitHub Releases üzerinden otomatik sürüm kontrolü eklendi.
+- Yeni sürüm bildirimi ve kullanıcı onayı eklendi.
+- Release ZIP paketini indirip kuran güncelleyici eklendi.
+- Güncelleme kayıtları `Logs/updater.log` dosyasına yazılıyor.
+- İnternet veya GitHub bağlantısı yoksa uygulama normal şekilde açılıyor.
 
 ## V2.1.0 - 29.07.2026
 - Excel Formül Merkezi eklendi.
