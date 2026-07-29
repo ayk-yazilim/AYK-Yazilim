@@ -3,7 +3,8 @@ name: Windows EXE Derle
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches:
+      - main
     paths-ignore:
       - "**/*.md"
 
@@ -22,8 +23,7 @@ jobs:
       - name: Node.js hazırla
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: npm
+          node-version: "24"
 
       - name: Bağımlılıkları GitHub sunucusunda kur
         shell: pwsh
