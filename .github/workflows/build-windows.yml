@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Kaynak kodu al
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Node.js hazırla
         uses: actions/setup-node@v4
@@ -38,7 +38,7 @@ jobs:
       - name: Derleme çıktılarını yükle
         uses: actions/upload-artifact@v4
         with:
-          name: AYK-Muhasebe-Yardimcisi-Windows-V3
+          name: AYK-Muhasebe-Yardimcisi-Windows-V3.0.1
           path: |
             dist/*.exe
             dist/*.yml
