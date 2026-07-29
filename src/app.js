@@ -5,7 +5,7 @@ var userAbbreviations={};
 var editingAbbreviation='';
 
 
-var currentVersion='3.0.1';
+var currentVersion='3.0.0';
 function getAppFolder(){var p=decodeURIComponent(location.pathname);if(p.charAt(0)=='/')p=p.substr(1);p=p.replace(/\//g,'\\');return p.substring(0,p.lastIndexOf('\\'));}
 function runUpdater(){try{var launcher=getAppFolder()+'\\AYK-Launcher.vbs';var fso=new ActiveXObject('Scripting.FileSystemObject');if(!fso.FileExists(launcher)){alert('AYK-Launcher.vbs bulunamadı.');return;}new ActiveXObject('WScript.Shell').Run('wscript.exe "'+launcher+'" /check',1,false);}catch(e){alert('Güncelleme kontrolü başlatılamadı: '+e.message);}}
 function showWhatsNewOnce(){var seen=String(readRegistry('LastSeenVersion',''));if(seen==currentVersion)return;try{writeRegistry('LastSeenVersion',currentVersion,'REG_SZ');}catch(e){}setTimeout(function(){alert('AYK Muhasebe Yardımcısı V2.3.1\n\nOTOMATİK GÜNCELLEME TESTİ BAŞARILI!\n\n• GitHub Release paketi indirildi.\n• Dosyalar otomatik değiştirildi.\n• Sürüm V2.3.1 olarak doğrulandı.\n• Program yeni sürümle yeniden açıldı.');},350);}
