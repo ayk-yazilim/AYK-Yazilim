@@ -348,19 +348,36 @@ function fallbackCopy(text,msg){var t=document.createElement('textarea');t.value
 function resizeWindow(){
   loadSettings();renderExcelFormulas();showTab('dashboardPage','tabDashboard');loadReleaseHistory(false);
   if(window.ayk&&window.ayk.getVersion){window.ayk.getVersion().then(function(v){currentVersion=v||currentVersion;updateVersionLabels(v);});}
+  if(window.ayk&&window.ayk.getUpdateState)window.ayk.getUpdateState().then(setUpdateCheckUi);
+  if(window.ayk&&window.ayk.onUpdateState)window.ayk.onUpdateState(setUpdateCheckUi);
 }
 function updateVersionLabels(v){
   if(!v)return;var els=document.querySelectorAll('.version');for(var i=0;i<els.length;i++)els[i].innerText='Sürüm V'+v;
   document.title='AYK Muhasebe Yardımcısı - V'+v;
   var dash=document.getElementById('dashboardUpdateStatus');if(dash)dash.innerText='V'+v+' Electron altyapısı etkin. Güncellemeler GitHub Releases üzerinden kontrol edilir.';
 }
+function setUpdateCheckUi(state){
+  var button=document.getElementById('updateCheckButton'),status=document.getElementById('updateCheckStatus');
+  if(!button||!status)return;
+  var type=state&&state.status?state.status:'idle',message=state&&state.message?state.message:'';
+  button.disabled=type==='checking'||type==='downloading';
+  if(type==='checking'){button.innerText='Kontrol Ediliyor...';status.innerText='Kontrol ediliyor';status.className='update-check-status checking';}
+  else if(type==='available'){button.innerText='Güncellemeyi Kontrol Et';status.innerText=state.version?'V'+state.version+' bulundu':'Yeni sürüm bulundu';status.className='update-check-status available';}
+  else if(type==='downloading'){button.innerText='İndiriliyor %'+Math.round(state.percent||0);status.innerText='Güncelleme indiriliyor';status.className='update-check-status checking';}
+  else if(type==='downloaded'){button.innerText='Güncellemeyi Kontrol Et';status.innerText='Güncelleme hazır';status.className='update-check-status available';}
+  else if(type==='current'){button.innerText='Güncellemeyi Kontrol Et';status.innerText='Güncel';status.className='update-check-status current';}
+  else if(type==='error'){button.innerText='Tekrar Kontrol Et';status.innerText='Kontrol başarısız';status.className='update-check-status error';}
+  else{button.innerText='Güncellemeyi Kontrol Et';status.innerText='Hazır';status.className='update-check-status';}
+}
 function runUpdater(){
   if(!window.ayk||!window.ayk.checkForUpdates){alert('Güncelleme servisi kullanılamıyor.');return;}
+  setUpdateCheckUi({status:'checking',message:'Güncelleme kontrol ediliyor...'});
   window.ayk.checkForUpdates().then(function(result){
     if(!result)return;
-    if(result.status==='current')alert('Program Güncel!\n\nKullandığınız sürüm: V'+result.version);
-    else if(result.status==='error')alert('Güncelleme kontrol edilemedi.\n\n'+result.message);
-  });
+    if(result.status==='current'){setUpdateCheckUi({status:'current',version:result.version,message:'Program güncel.'});alert('Program Güncel!\n\nKullandığınız sürüm: V'+result.version);}
+    else if(result.status==='error'){setUpdateCheckUi({status:'error',message:result.message});alert('Güncelleme kontrol edilemedi.\n\n'+result.message);}
+    else if(result.status==='cancelled')setUpdateCheckUi({status:'available',version:result.version,message:'Yeni sürüm bulundu.'});
+  }).catch(function(error){setUpdateCheckUi({status:'error',message:error.message});alert('Güncelleme kontrol edilemedi.\n\n'+error.message);});
 }
 function refreshStartupStatus(){if(window.ayk&&window.ayk.getAutoStart)window.ayk.getAutoStart().then(function(v){var e=document.getElementById('autoStart');if(e)e.checked=!!v;});}
 function setAutoStart(enabled){

@@ -86,3 +86,16 @@ input[type=text]:focus,select:focus{border-color:#38bdf8}
 .excel-toolbar{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}.excel-search{flex:2 1 260px}.excel-category{flex:1 1 150px}.excel-summary{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:10px 0;color:#94a3b8;font-size:12px}.formula-list{max-height:430px;overflow-y:auto;padding-right:3px}.formula-card{background:#0f172a;border:1px solid #334155;border-radius:10px;padding:11px;margin-bottom:8px}.formula-card:hover{border-color:#38bdf8}.formula-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.formula-name{font-size:15px;font-weight:900;color:#e2e8f0}.formula-category{display:inline-block;margin-top:4px;padding:2px 7px;border-radius:999px;background:#1e3a5f;color:#bae6fd;font-size:10px;font-weight:800}.formula-copy{border:0;border-radius:8px;padding:7px 10px;background:#38bdf8;color:#082032;font-weight:900;cursor:pointer}.formula-code{margin-top:9px;padding:9px;background:#111827;border:1px solid #263449;border-radius:8px;color:#7dd3fc;font-family:Consolas,monospace;font-size:13px;word-break:break-all}.formula-desc{margin-top:8px;color:#cbd5e1;font-size:12px;line-height:1.45}.formula-example{margin-top:5px;color:#94a3b8;font-size:11px;line-height:1.4}
 
 .release-toolbar{display:flex;gap:8px;align-items:center;margin-bottom:10px}.release-toolbar input{flex:1;margin:0}.release-list{margin-top:10px}.release-actions{display:flex;justify-content:flex-end;padding-top:9px}.release-actions .mini-button{width:auto}.dictionary-empty{padding:18px;text-align:center;color:#94a3b8;background:#0f172a;border:1px solid #334155;border-radius:10px}
+
+.updates-title-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.updates-title-row h2{margin:0}
+.update-check-area{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.update-check-button{padding:6px 9px;font-size:11px;white-space:nowrap;background:#334155}
+.update-check-button:hover{background:#475569}
+.update-check-button:disabled{opacity:.65;cursor:wait}
+.update-check-status{font-size:10px;font-weight:800;color:#94a3b8;white-space:nowrap}
+.update-check-status.current{color:#6ee7b7}
+.update-check-status.available{color:#fbbf24}
+.update-check-status.checking{color:#7dd3fc}
+.update-check-status.error{color:#fca5a5}
+@media(max-width:560px){.updates-title-row{align-items:flex-start}.update-check-area{max-width:190px}.update-check-status{display:none}.update-check-button{font-size:10px;padding:6px 7px}}

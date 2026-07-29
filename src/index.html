@@ -107,14 +107,19 @@
 
 <div id="guncellemePage" class="tab-page">
   <div class="panel">
-    <h2>Güncellemeler</h2>
+    <div class="updates-title-row">
+      <h2>Güncellemeler</h2>
+      <div class="update-check-area">
+        <span id="updateCheckStatus" class="update-check-status">Hazır</span>
+        <button id="updateCheckButton" class="mini-button update-check-button" onclick="runUpdater()">Güncellemeyi Kontrol Et</button>
+      </div>
+    </div>
     <div class="release-toolbar">
       <input id="releaseSearch" type="text" placeholder="Sürüm notlarında ara..." oninput="renderReleaseHistory()">
       <button class="secondary" onclick="loadReleaseHistory(true)">Yenile</button>
     </div>
     <div id="releaseSummary" class="update-status">GitHub sürüm geçmişi yükleniyor...</div>
     <div id="releaseList" class="release-list"></div>
-    <div class="buttons"><button class="primary" onclick="runUpdater()">Güncellemeyi Kontrol Et</button></div>
   </div>
 </div>
 
