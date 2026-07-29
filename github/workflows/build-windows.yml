@@ -1,0 +1,47 @@
+name: Windows EXE Derle
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "**/*.md"
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Kaynak kodu al
+        uses: actions/checkout@v6
+
+      - name: Node.js hazırla
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Bağımlılıkları GitHub sunucusunda kur
+        shell: pwsh
+        run: npm install --no-audit --no-fund
+
+      - name: Windows EXE dosyalarını üret
+        shell: pwsh
+        run: npm run build:win
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+
+      - name: Derleme çıktılarını yükle
+        uses: actions/upload-artifact@v4
+        with:
+          name: AYK-Muhasebe-Yardimcisi-Windows-V3
+          path: |
+            dist/*.exe
+            dist/*.yml
+            dist/*.blockmap
+          if-no-files-found: error
+          retention-days: 30
