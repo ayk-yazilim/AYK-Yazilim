@@ -1,0 +1,16 @@
+AYK MUHASEBE YARDIMCISI V2.0 MİMARİSİ
+
+Core/App.js
+- Uygulamanın çalışan JavaScript çekirdeği.
+
+Assets/Styles/main.css
+- Ana görünüm ve responsive stiller.
+
+Modules/*
+- Her araç için bağımsız modül alanı ve module.json manifesti.
+
+Geçiş Planı
+1. V2.0: klasör yapısı ve dış dosya ayrımı.
+2. V2.1: Excel Merkezi bağımsız modülü.
+3. V2.2: mevcut hesaplayıcıların tek tek modül dosyalarına taşınması.
+4. V3.0: EXE tabanlı arayüze geçiş değerlendirmesi.

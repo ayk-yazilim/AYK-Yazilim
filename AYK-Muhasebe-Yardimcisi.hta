@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title>AYK Muhasebe Asistanı - V2.0</title>
+<title>AYK Muhasebe Asistanı - V2.1.0</title>
 <HTA:APPLICATION
   APPLICATIONNAME="AYK Muhasebe Asistanı"
   ID="aykApp"
@@ -24,7 +24,7 @@
 </head>
 <body onload="resizeWindow();" onkeydown="keyHandler();">
 <div class="scroll-area"><div class="wrap"><div class="card">
-  <div class="header"><h1>AYK Muhasebe Yardımcısı</h1><div class="version">Sürüm V2.0</div></div>
+  <div class="header"><h1>AYK Muhasebe Yardımcısı</h1><div class="version">Sürüm V2.1.0</div></div>
   <div class="app-layout">
   <div id="sidebar" class="sidebar">
     <div class="sidebar-top"><button id="menuToggle" class="menu-toggle" onclick="toggleSidebar()" title="Menüyü gizle veya aç">«</button></div>
@@ -36,6 +36,7 @@
     <button id="tabKdv" class="tab-button" onclick="showTab('kdvPage','tabKdv')"><span class="menu-icon">%</span><span class="menu-label">KDV Yardımcısı</span></button>
     <button id="tabStopaj" class="tab-button" onclick="showTab('stopajPage','tabStopaj')"><span class="menu-icon">₺</span><span class="menu-label">Stopaj Yardımcısı</span></button>
     <button id="tabTevkifat" class="tab-button" onclick="showTab('tevkifatPage','tabTevkifat')"><span class="menu-icon">⅒</span><span class="menu-label">Tevkifat Yardımcısı</span></button>
+    <button id="tabExcel" class="tab-button" onclick="showTab('excelPage','tabExcel')"><span class="menu-icon">▦</span><span class="menu-label">Excel Merkezi</span></button>
     <button id="tabGuncelleme" class="tab-button" onclick="showTab('guncellemePage','tabGuncelleme')"><span class="menu-icon">↻</span><span class="menu-label">Güncellemeler</span></button>
     <button id="tabAyar" class="tab-button" onclick="showTab('ayarPage','tabAyar')"><span class="menu-icon">⚙</span><span class="menu-label">Ayarlar</span></button>
   </div>
@@ -47,9 +48,10 @@
         <button class="dashboard-card" onclick="showTab('kkegPage','tabKkeg')"><b>🧮 KKEG</b><span>Hızlı hesaplama</span></button>
         <button class="dashboard-card" onclick="showTab('unvanPage','tabUnvan')"><b>✎ Ünvan Düzeltici</b><span>Toplu ünvan düzenleme</span></button>
         <button class="dashboard-card" onclick="showTab('kdvPage','tabKdv')"><b>% KDV</b><span>Matrah ve KDV hesapla</span></button>
+        <button class="dashboard-card" onclick="showTab('excelPage','tabExcel')"><b>▦ Excel Merkezi</b><span>Hazır formül ve örnekler</span></button>
         <button class="dashboard-card" onclick="showTab('guncellemePage','tabGuncelleme')"><b>↻ Güncellemeler</b><span>Sürüm geçmişi</span></button>
       </div>
-      <div class="update-status">V2.0 modüler altyapı etkin. Mevcut hesaplayıcılar korunarak çekirdek dosyalar ayrıştırıldı.</div>
+      <div class="update-status">V2.1 Excel Formül Merkezi etkin. Formülleri ara, kategoriye göre süz ve tek tıkla kopyala.</div>
     </div>
   </div>
 
@@ -103,6 +105,19 @@
   <div id="tevkifatPage" class="tab-page"><div class="panel"><h2>KDV Tevkifat Yardımcısı</h2><label>KDV Hariç Matrah</label><div class="amount-row"><input id="tevkifatInput" type="text" onkeyup="calculateTevkifat()"><span class="tl">TL</span></div><div class="helper-grid"><div class="helper-col"><label>KDV Oranı</label><select id="tevkifatVat" onchange="calculateTevkifat()"><option value="20">%20</option><option value="10">%10</option><option value="1">%1</option></select></div><div class="helper-col"><label>Tevkifat Oranı</label><select id="tevkifatRate" onchange="calculateTevkifat()"><option value="2">2/10</option><option value="3">3/10</option><option value="4">4/10</option><option value="5" selected>5/10</option><option value="7">7/10</option><option value="9">9/10</option><option value="10">10/10</option></select></div></div><div class="buttons"><button class="primary" onclick="calculateTevkifat()">Hesapla</button><button class="secondary" onclick="copyTevkifat()">Kopyala</button><button class="secondary" onclick="clearTevkifat()">Temizle</button></div><div class="result-grid"><div class="result"><div class="name">Hesaplanan KDV</div><div id="tevkifatVatAmount" class="value">0,00 TL</div></div><div class="result"><div class="name">Tevkif Edilen KDV</div><div id="tevkifatHeld" class="value">0,00 TL</div></div><div class="result"><div class="name">Satıcıya Ödenecek KDV</div><div id="tevkifatPayableVat" class="value">0,00 TL</div></div><div class="result"><div class="name">Fatura Genel Toplamı</div><div id="tevkifatInvoice" class="value">0,00 TL</div></div><div class="result full"><div class="name">Tahsil Edilecek Tutar</div><div id="tevkifatCollection" class="value">0,00 TL</div></div></div><div class="note">Tevkifat oranını işlem türüne göre seç. Araç yalnızca matematiksel hesaplama yapar.</div></div></div>
 
   
+
+  <div id="excelPage" class="tab-page">
+    <div class="panel"><h2>Excel Formül Merkezi</h2>
+      <div class="excel-toolbar">
+        <div class="excel-search"><label>Formül Ara</label><input id="excelSearch" type="text" onkeyup="renderExcelFormulas()" placeholder="Örn: DÜŞEYARA, tarih, KDV"></div>
+        <div class="excel-category"><label>Kategori</label><select id="excelCategory" onchange="renderExcelFormulas()"><option value="Tümü">Tümü</option><option value="Muhasebe">Muhasebe</option><option value="Arama">Arama</option><option value="Mantıksal">Mantıksal</option><option value="Toplama">Toplama</option><option value="Metin">Metin</option><option value="Tarih">Tarih</option><option value="Temizleme">Temizleme</option></select></div>
+      </div>
+      <div class="excel-summary"><span id="excelCount">0 formül</span><button class="mini-button" onclick="clearExcelFilters()">Filtreyi Temizle</button></div>
+      <div id="excelFormulaList" class="formula-list"></div>
+      <div class="note">Formüller Türkçe Excel söz dizimine göre hazırlanmıştır. Hücre adreslerini kendi çalışma sayfana göre değiştir.</div>
+    </div>
+  </div>
+
 <div id="guncellemePage" class="tab-page">
   <div class="panel">
     <h2>Güncellemeler</h2>

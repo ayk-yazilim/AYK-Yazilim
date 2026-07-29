@@ -1,5 +1,14 @@
 # Değişiklik Geçmişi
 
+## V2.1.0 - 29.07.2026
+- Excel Formül Merkezi eklendi.
+- 32 hazır Türkçe Excel formülü eklendi.
+- Formül arama ve kategori filtreleme eklendi.
+- Tek tıkla kopyalama eklendi.
+- Dashboard ve sürüm ekranı güncellendi.
+
+# Değişiklik Geçmişi
+
 ## 2.0.0 - 29.07.2026
 - Modüler klasör yapısı oluşturuldu.
 - Dashboard eklendi.

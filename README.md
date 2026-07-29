@@ -1,18 +1,24 @@
-AYK MUHASEBE YARDIMCISI V2.0
+# AYK Muhasebe Yardımcısı
 
-Başlatma:
-- AYK-Launcher.vbs dosyasını açın.
-- Alternatif: AYK-Muhasebe-Yardimcisi.hta dosyasını doğrudan çalıştırın.
+Muhasebecilerin günlük işlemleri için taşınabilir Windows yardımcı uygulaması.
 
-Önemli:
-- Core, Assets ve Modules klasörlerini HTA dosyasından ayırmayın.
-- Program taşınabilir çalışır ve yönetici yetkisi istemez.
+## Sürüm
 
-V2.0 ile gelenler:
-- Modüler proje altyapısı
-- Dashboard
-- Dışarı alınmış tema ve JavaScript çekirdeği
-- Modül manifestleri
-- Mimari dokümantasyon
+**V2.1.0 – Excel Formül Merkezi**
 
-V2.0.1: Launcher kodlama hatasi duzeltildi. Programi AYK-Launcher.vbs ile acabilirsiniz.
+## Başlatma
+
+1. Tüm dosya ve klasörleri aynı konumda tutun.
+2. `AYK-Launcher.vbs` dosyasını açın.
+3. Alternatif olarak `AYK-Muhasebe-Yardimcisi.hta` doğrudan çalıştırılabilir.
+
+## Özellikler
+
+- KKEG, KDV, stopaj ve tevkifat hesaplayıcıları
+- Yansıtma ve kiralık araç hesaplayıcıları
+- Ünvan Düzeltici ve Kısaltma Yöneticisi
+- Excel Formül Merkezi: arama, kategori filtresi ve tek tıkla kopyalama
+- Registry tabanlı ayarlar
+- Taşınabilir çalışma; kurulum ve yönetici yetkisi gerektirmez
+
+© 2026 AYK Yazılım. Tüm hakları saklıdır.
