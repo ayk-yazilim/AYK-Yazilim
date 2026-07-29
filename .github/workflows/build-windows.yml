@@ -3,8 +3,7 @@ name: Windows EXE Derle
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
+    branches: [main]
     paths-ignore:
       - "**/*.md"
 
@@ -25,7 +24,7 @@ jobs:
         with:
           node-version: "24"
 
-      - name: Bağımlılıkları GitHub sunucusunda kur
+      - name: Bağımlılıkları kur
         shell: pwsh
         run: npm install --no-audit --no-fund
 
@@ -38,7 +37,7 @@ jobs:
       - name: Derleme çıktılarını yükle
         uses: actions/upload-artifact@v4
         with:
-          name: AYK-Muhasebe-Yardimcisi-Windows-V3.0.1
+          name: AYK-Muhasebe-Yardimcisi-Windows-V3.1.0
           path: |
             dist/*.exe
             dist/*.yml

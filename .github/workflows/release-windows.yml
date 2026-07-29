@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: "24"
 
-      - name: Bağımlılıkları GitHub sunucusunda kur
+      - name: Bağımlılıkları kur
         shell: pwsh
         run: npm install --no-audit --no-fund
 
