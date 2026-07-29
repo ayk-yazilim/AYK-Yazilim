@@ -1,3 +1,73 @@
-KDV yardımcı hesapları
-
-Not: V2.0 geçiş sürümünde çalışan fonksiyonlar Core/App.js içinde korunmuştur. Sonraki sürümlerde modül kodları bu klasörlere tek tek taşınacaktır.
+{
+  "name": "ayk-muhasebe-yardimcisi",
+  "version": "3.0.1",
+  "description": "AYK Muhasebe Yardımcısı",
+  "author": "AYK Yazılım",
+  "main": "main.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win nsis portable --x64",
+    "release": "electron-builder --win nsis portable --x64 --publish always"
+  },
+  "dependencies": {
+    "electron-updater": "^6.6.2"
+  },
+  "devDependencies": {
+    "electron": "^37.2.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.aykyazilim.muhasebeyardimcisi",
+    "productName": "AYK Muhasebe Yardımcısı",
+    "asar": true,
+    "files": [
+      "main.js",
+      "preload.js",
+      "src/**/*",
+      "Assets/**/*",
+      "Core/**/*",
+      "Modules/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "ayk-yazilim",
+        "repo": "AYK-Yazilim",
+        "releaseType": "release"
+      }
+    ],
+    "win": {
+      "icon": "AYK.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "AYK Muhasebe Yardımcısı",
+      "artifactName": "AYK-Muhasebe-Yardimcisi-Setup-${version}-${arch}.${ext}"
+    },
+    "portable": {
+      "artifactName": "AYK-Muhasebe-Yardimcisi-Portable-${version}-${arch}.${ext}"
+    }
+  }
+}
