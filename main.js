@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const https = require('https');
 const { autoUpdater } = require('electron-updater');
 
 let mainWindow;
@@ -20,6 +21,33 @@ function sendUpdateState(next) {
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send('update:state', updateState);
   }
+}
+
+
+function fetchJson(url) {
+  return new Promise((resolve, reject) => {
+    const request = https.get(url, {
+      headers: {
+        'User-Agent': 'AYK-Muhasebe-Yardimcisi',
+        'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28'
+      }
+    }, response => {
+      let body = '';
+      response.setEncoding('utf8');
+      response.on('data', chunk => { body += chunk; });
+      response.on('end', () => {
+        if (response.statusCode < 200 || response.statusCode >= 300) {
+          reject(new Error(`GitHub API ${response.statusCode}: ${body.slice(0, 250)}`));
+          return;
+        }
+        try { resolve(JSON.parse(body)); }
+        catch (error) { reject(error); }
+      });
+    });
+    request.setTimeout(15000, () => request.destroy(new Error('GitHub isteği zaman aşımına uğradı.')));
+    request.on('error', reject);
+  });
 }
 
 function createWindow() {
@@ -69,6 +97,31 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
 
 ipcMain.handle('app:get-version', () => app.getVersion());
+ipcMain.handle('app:open-external', (_e, url) => {
+  if (typeof url !== 'string' || !/^https:\/\/github\.com\//i.test(url)) return false;
+  shell.openExternal(url);
+  return true;
+});
+ipcMain.handle('releases:get', async () => {
+  try {
+    const releases = await fetchJson('https://api.github.com/repos/ayk-yazilim/AYK-Yazilim/releases?per_page=20');
+    return {
+      ok: true,
+      currentVersion: app.getVersion(),
+      releases: releases.filter(r => !r.draft).map(r => ({
+        tag: r.tag_name || '',
+        name: r.name || r.tag_name || '',
+        body: r.body || '',
+        publishedAt: r.published_at || r.created_at || '',
+        url: r.html_url || '',
+        prerelease: Boolean(r.prerelease)
+      }))
+    };
+  } catch (error) {
+    log(`Release history error: ${error && error.stack ? error.stack : error}`);
+    return { ok: false, currentVersion: app.getVersion(), message: error && error.message ? error.message : String(error), releases: [] };
+  }
+});
 ipcMain.handle('app:get-log-path', () => path.join(app.getPath('userData'), 'Logs', 'ayk.log'));
 ipcMain.handle('app:open-log-folder', () => shell.openPath(path.join(app.getPath('userData'), 'Logs')));
 ipcMain.handle('app:get-auto-start', () => app.getLoginItemSettings().openAtLogin);

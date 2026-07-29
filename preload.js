@@ -4,6 +4,8 @@ contextBridge.exposeInMainWorld('ayk', {
   getVersion: () => ipcRenderer.invoke('app:get-version'),
   checkForUpdates: () => ipcRenderer.invoke('update:check'),
   getUpdateState: () => ipcRenderer.invoke('update:get-state'),
+  getReleases: () => ipcRenderer.invoke('releases:get'),
+  openExternal: url => ipcRenderer.invoke('app:open-external', url),
   onUpdateState: callback => ipcRenderer.on('update:state', (_event, state) => callback(state)),
   getAutoStart: () => ipcRenderer.invoke('app:get-auto-start'),
   setAutoStart: enabled => ipcRenderer.invoke('app:set-auto-start', enabled),

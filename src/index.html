@@ -38,7 +38,7 @@
         <button class="dashboard-card" onclick="showTab('excelPage','tabExcel')"><b>▦ Excel Merkezi</b><span>Hazır formül ve örnekler</span></button>
         <button class="dashboard-card" onclick="showTab('guncellemePage','tabGuncelleme')"><b>↻ Güncellemeler</b><span>Sürüm geçmişi</span></button>
       </div>
-      <div class="update-status">V3.0.0 Electron altyapısı etkin. Güncellemeler uygulama içinden kontrol edilir.</div>
+      <div id="dashboardUpdateStatus" class="update-status">Sürüm bilgisi yükleniyor...</div>
     </div>
   </div>
 
@@ -108,23 +108,13 @@
 <div id="guncellemePage" class="tab-page">
   <div class="panel">
     <h2>Güncellemeler</h2>
-    <div class="update-card">
-      <div class="update-head"><div><div class="update-version">V3.0.0 GitHub Otomatik Güncelleme</div><div class="update-date">29.07.2026</div></div><span class="badge new">GÜNCEL</span></div>
-      <div class="update-item"><span class="badge new">Yeni</span>Dashboard eklendi.</div>
-      <div class="update-item"><span class="badge new">Yeni</span>Core, Modules ve Assets klasör yapısı oluşturuldu.</div>
-      <div class="update-item"><span class="badge improve">İyileştirme</span>JavaScript çekirdeği ve tema dosyaları HTA içinden ayrıldı.</div>
-      <div class="update-item"><span class="badge fix">Düzeltme</span>Mevcut hesaplayıcılar ve Registry ayarları korundu.</div>
+    <div class="release-toolbar">
+      <input id="releaseSearch" type="text" placeholder="Sürüm notlarında ara..." oninput="renderReleaseHistory()">
+      <button class="secondary" onclick="loadReleaseHistory(true)">Yenile</button>
     </div>
-    <div class="update-card"><div class="update-head"><div class="update-version">V1.5</div></div>
-      <div class="update-item"><span class="badge new">Yeni</span>Manuel kısaltma ekleme, düzenleme ve silme.</div>
-      <div class="update-item"><span class="badge new">Yeni</span>Kullanıcı kısaltmalarının Registry'de saklanması.</div>
-    </div>
-    <div class="update-card"><div class="update-head"><div class="update-version">V1.4</div></div>
-      <div class="update-item"><span class="badge fix">Düzeltme</span>Ayarlar Registry sistemine taşındı.</div>
-      <div class="update-item"><span class="badge fix">Düzeltme</span>Uygulama simgesi yeniden paketlendi.</div>
-    </div>
+    <div id="releaseSummary" class="update-status">GitHub sürüm geçmişi yükleniyor...</div>
+    <div id="releaseList" class="release-list"></div>
     <div class="buttons"><button class="primary" onclick="runUpdater()">Güncellemeyi Kontrol Et</button></div>
-    <div class="update-status">Güncelleme altyapısı hazır. Otomatik indirme için yayın dosyalarının internette erişilebilen bir sunucuya veya GitHub Releases alanına yüklenmesi gerekir.</div>
   </div>
 </div>
 

@@ -346,12 +346,13 @@ function copyText(text,msg){
 }
 function fallbackCopy(text,msg){var t=document.createElement('textarea');t.value=text;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);alert(msg);}
 function resizeWindow(){
-  loadSettings();renderExcelFormulas();showTab('dashboardPage','tabDashboard');
+  loadSettings();renderExcelFormulas();showTab('dashboardPage','tabDashboard');loadReleaseHistory(false);
   if(window.ayk&&window.ayk.getVersion){window.ayk.getVersion().then(function(v){currentVersion=v||currentVersion;updateVersionLabels(v);});}
 }
 function updateVersionLabels(v){
   if(!v)return;var els=document.querySelectorAll('.version');for(var i=0;i<els.length;i++)els[i].innerText='Sürüm V'+v;
   document.title='AYK Muhasebe Yardımcısı - V'+v;
+  var dash=document.getElementById('dashboardUpdateStatus');if(dash)dash.innerText='V'+v+' Electron altyapısı etkin. Güncellemeler GitHub Releases üzerinden kontrol edilir.';
 }
 function runUpdater(){
   if(!window.ayk||!window.ayk.checkForUpdates){alert('Güncelleme servisi kullanılamıyor.');return;}
@@ -368,3 +369,45 @@ function setAutoStart(enabled){
 }
 function createDesktopShortcut(){if(window.ayk&&window.ayk.createDesktopShortcut)window.ayk.createDesktopShortcut().then(function(ok){alert(ok?'Masaüstü kısayolu oluşturuldu.':'Kısayol oluşturulamadı.');});}
 function showWhatsNewOnce(){}
+
+
+var releaseHistory=[];
+var releaseCurrentVersion='';
+function versionOnly(v){return String(v||'').replace(/^v/i,'').trim();}
+function formatReleaseDate(value){if(!value)return '';var d=new Date(value);if(isNaN(d.getTime()))return '';return ('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2)+'.'+d.getFullYear();}
+function releaseCategory(text){var t=turkishUpper(text);if(t.indexOf('DÜZELT')>=0||t.indexOf('HATA')>=0||t.indexOf('FIX')>=0)return {cls:'fix',label:'Düzeltme'};if(t.indexOf('İYİLEŞ')>=0||t.indexOf('GELİŞTİR')>=0||t.indexOf('PERFORMANS')>=0)return {cls:'improve',label:'İyileştirme'};return {cls:'new',label:'Yeni'};}
+function parseReleaseBody(body){
+  var lines=String(body||'').replace(/\r/g,'').split('\n'),items=[],section='',i,line,m;
+  for(i=0;i<lines.length;i++){
+    line=lines[i].replace(/^\s+|\s+$/g,'');if(!line)continue;
+    m=line.match(/^#{1,4}\s+(.+)$/);if(m){section=m[1];continue;}
+    m=line.match(/^[-*+]\s+(.+)$/);if(m){items.push({text:m[1].replace(/\*\*/g,''),section:section});continue;}
+    m=line.match(/^\d+[.)]\s+(.+)$/);if(m){items.push({text:m[1].replace(/\*\*/g,''),section:section});}
+  }
+  if(!items.length&&body){var plain=String(body).replace(/[#*_`>]/g,' ').replace(/\s+/g,' ').trim();if(plain)items.push({text:plain,section:''});}
+  return items;
+}
+function loadReleaseHistory(force){
+  var summary=document.getElementById('releaseSummary');if(!summary||!window.ayk||!window.ayk.getReleases)return;
+  summary.innerText=force?'GitHub sürüm geçmişi yenileniyor...':'GitHub sürüm geçmişi yükleniyor...';
+  window.ayk.getReleases().then(function(result){
+    if(!result||!result.ok){releaseHistory=[];summary.innerText='Sürüm geçmişi alınamadı: '+(result&&result.message?result.message:'Bilinmeyen hata');renderReleaseHistory();return;}
+    releaseHistory=result.releases||[];releaseCurrentVersion=versionOnly(result.currentVersion);renderReleaseHistory();
+  }).catch(function(error){releaseHistory=[];summary.innerText='Sürüm geçmişi alınamadı: '+error.message;renderReleaseHistory();});
+}
+function renderReleaseHistory(){
+  var list=document.getElementById('releaseList'),summary=document.getElementById('releaseSummary');if(!list||!summary)return;
+  var q=turkishUpper(document.getElementById('releaseSearch').value||''),html='',shown=0,i,r,items,j,item,cat,isCurrent,hay;
+  for(i=0;i<releaseHistory.length;i++){
+    r=releaseHistory[i];items=parseReleaseBody(r.body);hay=turkishUpper((r.tag||'')+' '+(r.name||'')+' '+(r.body||''));if(q&&hay.indexOf(q)<0)continue;
+    isCurrent=versionOnly(r.tag)==releaseCurrentVersion;
+    html+='<div class="update-card"><div class="update-head"><div><div class="update-version">'+htmlEscape(r.name||r.tag)+'</div><div class="update-date">'+htmlEscape(formatReleaseDate(r.publishedAt))+'</div></div>'+(isCurrent?'<span class="badge new">BU SÜRÜM</span>':'')+'</div>';
+    if(items.length){for(j=0;j<items.length;j++){item=items[j];cat=releaseCategory(item.section+' '+item.text);html+='<div class="update-item"><span class="badge '+cat.cls+'">'+cat.label+'</span>'+htmlEscape(item.text)+'</div>';}}
+    else html+='<div class="update-item">Bu sürüm için açıklama girilmemiş.</div>';
+    if(r.url)html+='<div class="release-actions"><button class="mini-button" onclick="openReleaseUrl(\''+String(r.url).replace(/'/g,'')+'\')">GitHub’da Görüntüle</button></div>';
+    html+='</div>';shown++;
+  }
+  if(!shown)html='<div class="dictionary-empty">'+(releaseHistory.length?'Aramana uygun sürüm notu bulunamadı.':'Henüz yayınlanmış GitHub Release bulunamadı.')+'</div>';
+  list.innerHTML=html;summary.innerText=shown+' sürüm gösteriliyor · Çalışan sürüm V'+(releaseCurrentVersion||currentVersion);
+}
+function openReleaseUrl(url){if(window.ayk&&window.ayk.openExternal)window.ayk.openExternal(url);}
