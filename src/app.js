@@ -346,38 +346,67 @@ function copyText(text,msg){
 }
 function fallbackCopy(text,msg){var t=document.createElement('textarea');t.value=text;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);alert(msg);}
 function resizeWindow(){
-  loadSettings();renderExcelFormulas();showTab('dashboardPage','tabDashboard');loadReleaseHistory(false);
+  loadSettings();renderExcelFormulas();showTab('dashboardPage','tabDashboard');loadReleaseHistory(false);renderLastUpdateCheck();
   if(window.ayk&&window.ayk.getVersion){window.ayk.getVersion().then(function(v){currentVersion=v||currentVersion;updateVersionLabels(v);});}
   if(window.ayk&&window.ayk.getUpdateState)window.ayk.getUpdateState().then(setUpdateCheckUi);
-  if(window.ayk&&window.ayk.onUpdateState)window.ayk.onUpdateState(setUpdateCheckUi);
+  if(window.ayk&&window.ayk.onUpdateState)window.ayk.onUpdateState(function(state){setUpdateCheckUi(state);notifyUpdateState(state);});
 }
 function updateVersionLabels(v){
   if(!v)return;var els=document.querySelectorAll('.version');for(var i=0;i<els.length;i++)els[i].innerText='Sürüm V'+v;
   document.title='AYK Muhasebe Yardımcısı - V'+v;
   var dash=document.getElementById('dashboardUpdateStatus');if(dash)dash.innerText='V'+v+' Electron altyapısı etkin. Güncellemeler GitHub Releases üzerinden kontrol edilir.';
 }
+function setLastUpdateCheck(){try{localStorage.setItem('AYK_LastUpdateCheck',new Date().toISOString());}catch(e){}renderLastUpdateCheck();}
+function renderLastUpdateCheck(){
+  var e=document.getElementById('lastUpdateCheck');if(!e)return;var raw='';try{raw=localStorage.getItem('AYK_LastUpdateCheck')||'';}catch(x){}
+  if(!raw){e.innerText='Son kontrol: Henüz kontrol edilmedi';return;}var d=new Date(raw);if(isNaN(d.getTime())){e.innerText='Son kontrol: Bilinmiyor';return;}
+  e.innerText='Son kontrol: '+('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2)+'.'+d.getFullYear()+' '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);
+}
 function setUpdateCheckUi(state){
-  var button=document.getElementById('updateCheckButton'),status=document.getElementById('updateCheckStatus');
+  var button=document.getElementById('updateCheckButton'),status=document.getElementById('updateCheckStatus'),message=document.getElementById('updateMessage');
+  var wrap=document.getElementById('updateProgressWrap'),bar=document.getElementById('updateProgressBar'),text=document.getElementById('updateProgressText'),install=document.getElementById('installUpdateButton');
   if(!button||!status)return;
-  var type=state&&state.status?state.status:'idle',message=state&&state.message?state.message:'';
-  button.disabled=type==='checking'||type==='downloading';
+  var type=state&&state.status?state.status:'idle',percent=Math.max(0,Math.min(100,Math.round(state&&state.percent||0))),msg=state&&state.message?state.message:'';
+  button.disabled=type==='checking'||type==='downloading'||type==='installing';
+  if(message)message.innerText=msg||'Güncelleme servisi hazır.';
+  if(wrap)wrap.style.display=type==='downloading'?'flex':'none';if(bar)bar.style.width=percent+'%';if(text)text.innerText='%'+percent;
+  if(install)install.style.display=type==='downloaded'?'inline-block':'none';
   if(type==='checking'){button.innerText='Kontrol Ediliyor...';status.innerText='Kontrol ediliyor';status.className='update-check-status checking';}
   else if(type==='available'){button.innerText='Güncellemeyi Kontrol Et';status.innerText=state.version?'V'+state.version+' bulundu':'Yeni sürüm bulundu';status.className='update-check-status available';}
-  else if(type==='downloading'){button.innerText='İndiriliyor %'+Math.round(state.percent||0);status.innerText='Güncelleme indiriliyor';status.className='update-check-status checking';}
+  else if(type==='downloading'){button.innerText='İndiriliyor %'+percent;status.innerText='Güncelleme indiriliyor';status.className='update-check-status checking';}
   else if(type==='downloaded'){button.innerText='Güncellemeyi Kontrol Et';status.innerText='Güncelleme hazır';status.className='update-check-status available';}
+  else if(type==='installing'){button.innerText='Yeniden Başlatılıyor...';status.innerText='Kuruluyor';status.className='update-check-status checking';}
   else if(type==='current'){button.innerText='Güncellemeyi Kontrol Et';status.innerText='Güncel';status.className='update-check-status current';}
   else if(type==='error'){button.innerText='Tekrar Kontrol Et';status.innerText='Kontrol başarısız';status.className='update-check-status error';}
   else{button.innerText='Güncellemeyi Kontrol Et';status.innerText='Hazır';status.className='update-check-status';}
 }
+function showToast(message,type){
+  var box=document.getElementById('toastContainer');if(!box||!message)return;var t=document.createElement('div');t.className='toast '+(type||'info');t.innerText=message;box.appendChild(t);
+  setTimeout(function(){t.className+=' hide';setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},300);},3200);
+}
+var lastNotifiedUpdateState='';
+function notifyUpdateState(state){
+  var type=state&&state.status?state.status:'';if(!type||type===lastNotifiedUpdateState||type==='downloading'||type==='checking')return;lastNotifiedUpdateState=type;
+  if(type==='available')showToast(state.message||'Yeni sürüm bulundu.','warning');
+  else if(type==='downloaded')showToast('Güncelleme indirildi. Yeniden başlatıp kurabilirsiniz.','success');
+  else if(type==='current')showToast('Program güncel.','success');
+  else if(type==='error')showToast(state.message||'Güncelleme kontrolü başarısız.','error');
+}
 function runUpdater(){
-  if(!window.ayk||!window.ayk.checkForUpdates){alert('Güncelleme servisi kullanılamıyor.');return;}
-  setUpdateCheckUi({status:'checking',message:'Güncelleme kontrol ediliyor...'});
+  if(!window.ayk||!window.ayk.checkForUpdates){showToast('Güncelleme servisi kullanılamıyor.','error');return;}
+  setLastUpdateCheck();setUpdateCheckUi({status:'checking',message:'Güncelleme kontrol ediliyor...'});
   window.ayk.checkForUpdates().then(function(result){
-    if(!result)return;
-    if(result.status==='current'){setUpdateCheckUi({status:'current',version:result.version,message:'Program güncel.'});alert('Program Güncel!\n\nKullandığınız sürüm: V'+result.version);}
-    else if(result.status==='error'){setUpdateCheckUi({status:'error',message:result.message});alert('Güncelleme kontrol edilemedi.\n\n'+result.message);}
-    else if(result.status==='cancelled')setUpdateCheckUi({status:'available',version:result.version,message:'Yeni sürüm bulundu.'});
-  }).catch(function(error){setUpdateCheckUi({status:'error',message:error.message});alert('Güncelleme kontrol edilemedi.\n\n'+error.message);});
+    if(!result)return;setLastUpdateCheck();setUpdateCheckUi(result);
+    if(result.status==='current')showToast('Program güncel: V'+result.version,'success');
+    else if(result.status==='error')showToast('Güncelleme kontrol edilemedi: '+result.message,'error');
+    else if(result.status==='cancelled')showToast('Güncelleme daha sonra indirilecek.','info');
+    else if(result.status==='downloaded')showToast('Güncelleme indirildi. Kurulum hazır.','success');
+  }).catch(function(error){setUpdateCheckUi({status:'error',message:error.message});showToast('Güncelleme kontrol edilemedi: '+error.message,'error');});
+}
+function installDownloadedUpdate(){
+  if(!window.ayk||!window.ayk.installUpdate){showToast('Kurulum servisi kullanılamıyor.','error');return;}
+  if(!confirm('Program yeniden başlatılacak ve güncelleme kurulacak. Devam edilsin mi?'))return;
+  window.ayk.installUpdate().then(function(result){if(!result||!result.ok)showToast(result&&result.message?result.message:'Güncelleme başlatılamadı.','error');});
 }
 function refreshStartupStatus(){if(window.ayk&&window.ayk.getAutoStart)window.ayk.getAutoStart().then(function(v){var e=document.getElementById('autoStart');if(e)e.checked=!!v;});}
 function setAutoStart(enabled){

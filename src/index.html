@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title>AYK Muhasebe Yardımcısı - V3.0.0</title>
+<title>AYK Muhasebe Yardımcısı - V3.3.0</title>
 
 <link rel="stylesheet" type="text/css" href="../Assets/Styles/main.css">
 <script language="javascript" src="app.js"></script>
 </head>
 <body onload="resizeWindow();" onkeydown="keyHandler();">
 <div class="scroll-area"><div class="wrap"><div class="card">
-  <div class="header"><h1>AYK Muhasebe Yardımcısı</h1><div class="version">Sürüm V3.0.0</div></div>
-  <div class="update-status" style="margin:10px 18px;">V3.0 Electron masaüstü altyapısı etkin.</div>
+  <div class="header"><h1>AYK Muhasebe Yardımcısı</h1><div class="version">Sürüm V3.3.0</div></div>
+  <div class="update-status" style="margin:10px 18px;">V3.3 Electron masaüstü altyapısı etkin.</div>
   <div class="app-layout">
   <div id="sidebar" class="sidebar">
     <div class="sidebar-top"><button id="menuToggle" class="menu-toggle" onclick="toggleSidebar()" title="Menüyü gizle veya aç">«</button></div>
@@ -114,6 +114,19 @@
         <button id="updateCheckButton" class="mini-button update-check-button" onclick="runUpdater()">Güncellemeyi Kontrol Et</button>
       </div>
     </div>
+    <div id="updateCenter" class="update-center">
+      <div class="update-center-row">
+        <div>
+          <div id="updateMessage" class="update-message">Güncelleme servisi hazır.</div>
+          <div id="lastUpdateCheck" class="last-update-check">Son kontrol: Henüz kontrol edilmedi</div>
+        </div>
+        <button id="installUpdateButton" class="primary install-update-button" onclick="installDownloadedUpdate()" style="display:none">Yeniden Başlat ve Güncelle</button>
+      </div>
+      <div id="updateProgressWrap" class="update-progress-wrap" style="display:none">
+        <div class="update-progress-track"><div id="updateProgressBar" class="update-progress-bar"></div></div>
+        <span id="updateProgressText">%0</span>
+      </div>
+    </div>
     <div class="release-toolbar">
       <input id="releaseSearch" type="text" placeholder="Sürüm notlarında ara..." oninput="renderReleaseHistory()">
       <button class="secondary" onclick="loadReleaseHistory(true)">Yenile</button>
@@ -139,4 +152,5 @@
   </div></div>
   <div class="footer">© 2026 AYK Yazılım</div>
 </div></div></div>
+<div id="toastContainer" class="toast-container"></div>
 </body></html>

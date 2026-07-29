@@ -172,24 +172,19 @@ ipcMain.handle('update:check', async () => {
 
     if (choice.response !== 0) return { status: 'cancelled', version: latest };
     await autoUpdater.downloadUpdate();
-
-    const installChoice = await dialog.showMessageBox(mainWindow, {
-      type: 'info',
-      buttons: ['Yeniden Başlat ve Güncelle', 'Daha Sonra'],
-      defaultId: 0,
-      cancelId: 1,
-      title: 'Güncelleme Hazır',
-      message: `V${latest} indirildi.`,
-      detail: 'Kurulumu tamamlamak için program yeniden başlatılacak.'
-    });
-
-    if (installChoice.response === 0) {
-      setImmediate(() => autoUpdater.quitAndInstall(false, true));
-      return { status: 'installing', version: latest };
-    }
-    return { status: 'downloaded', version: latest };
+    return { status: 'downloaded', version: latest, message: 'Güncelleme indirildi. Kurulum için yeniden başlatın.' };
   } catch (error) {
     log(`Manual update error: ${error && error.stack ? error.stack : error}`);
     return { status: 'error', message: error && error.message ? error.message : String(error) };
   }
+});
+
+
+ipcMain.handle('update:install', () => {
+  if (updateState.status !== 'downloaded') {
+    return { ok: false, message: 'Kuruluma hazır indirilmiş güncelleme bulunamadı.' };
+  }
+  sendUpdateState({ status: 'installing', message: 'Program yeniden başlatılıyor ve güncelleme kuruluyor...' });
+  setImmediate(() => autoUpdater.quitAndInstall(false, true));
+  return { ok: true };
 });

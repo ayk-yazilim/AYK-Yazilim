@@ -3,6 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('ayk', {
   getVersion: () => ipcRenderer.invoke('app:get-version'),
   checkForUpdates: () => ipcRenderer.invoke('update:check'),
+  installUpdate: () => ipcRenderer.invoke('update:install'),
   getUpdateState: () => ipcRenderer.invoke('update:get-state'),
   getReleases: () => ipcRenderer.invoke('releases:get'),
   openExternal: url => ipcRenderer.invoke('app:open-external', url),

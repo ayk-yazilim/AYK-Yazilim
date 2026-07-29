@@ -1,6 +1,6 @@
 {
   "name": "ayk-muhasebe-yardimcisi",
-  "version": "3.2.1",
+  "version": "3.3.0",
   "description": "Muhasebecinin günlük işleri için akıllı araç kutusu",
   "main": "main.js",
   "author": "AYK Yazılım",
@@ -23,7 +23,9 @@
     "appId": "com.aykyazilim.muhasebeyardimcisi",
     "productName": "AYK Muhasebe Yardımcısı",
     "asar": true,
-    "directories": { "output": "dist" },
+    "directories": {
+      "output": "dist"
+    },
     "files": [
       "main.js",
       "preload.js",
@@ -34,17 +36,29 @@
       "AYK-Logo.png",
       "package.json"
     ],
-    "publish": [{
-      "provider": "github",
-      "owner": "ayk-yazilim",
-      "repo": "AYK-Yazilim",
-      "releaseType": "release"
-    }],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "ayk-yazilim",
+        "repo": "AYK-Yazilim",
+        "releaseType": "release"
+      }
+    ],
     "win": {
       "icon": "AYK.ico",
       "target": [
-        { "target": "nsis", "arch": ["x64"] },
-        { "target": "portable", "arch": ["x64"] }
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
       ]
     },
     "nsis": {
