@@ -15,13 +15,12 @@ jobs:
 
     steps:
       - name: Kaynak kodu al
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Node.js hazırla
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: npm
+          node-version: "24"
 
       - name: Bağımlılıkları GitHub sunucusunda kur
         shell: pwsh
