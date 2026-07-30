@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title>AYK Muhasebe Yardımcısı - V3.3.0</title>
+<title>AYK Muhasebe Yardımcısı - V3.4.0</title>
 
 <link rel="stylesheet" type="text/css" href="../Assets/Styles/main.css">
 <script language="javascript" src="app.js"></script>
 </head>
 <body onload="resizeWindow();" onkeydown="keyHandler();">
 <div class="scroll-area"><div class="wrap"><div class="card">
-  <div class="header"><h1>AYK Muhasebe Yardımcısı</h1><div class="version">Sürüm V3.3.0</div></div>
-  <div class="update-status" style="margin:10px 18px;">V3.3 Electron masaüstü altyapısı etkin.</div>
+  <div class="header"><h1>AYK Muhasebe Yardımcısı</h1><div class="version">Sürüm V3.4.0</div></div>
+  <div class="update-status" style="margin:10px 18px;">V3.4 TCMB Döviz Merkezi ve İstek & Öneri Merkezi etkin.</div>
   <div class="app-layout">
   <div id="sidebar" class="sidebar">
     <div class="sidebar-top"><button id="menuToggle" class="menu-toggle" onclick="toggleSidebar()" title="Menüyü gizle veya aç">«</button></div>
@@ -24,6 +24,8 @@
     <button id="tabStopaj" class="tab-button" onclick="showTab('stopajPage','tabStopaj')"><span class="menu-icon">₺</span><span class="menu-label">Stopaj Yardımcısı</span></button>
     <button id="tabTevkifat" class="tab-button" onclick="showTab('tevkifatPage','tabTevkifat')"><span class="menu-icon">⅒</span><span class="menu-label">Tevkifat Yardımcısı</span></button>
     <button id="tabExcel" class="tab-button" onclick="showTab('excelPage','tabExcel')"><span class="menu-icon">▦</span><span class="menu-label">Excel Merkezi</span></button>
+    <button id="tabTcmb" class="tab-button" onclick="showTab('tcmbPage','tabTcmb')"><span class="menu-icon">💱</span><span class="menu-label">TCMB Döviz</span></button>
+    <button id="tabOneri" class="tab-button" onclick="showTab('oneriPage','tabOneri')"><span class="menu-icon">💡</span><span class="menu-label">İstek & Öneri</span></button>
     <button id="tabGuncelleme" class="tab-button" onclick="showTab('guncellemePage','tabGuncelleme')"><span class="menu-icon">↻</span><span class="menu-label">Güncellemeler</span></button>
     <button id="tabAyar" class="tab-button" onclick="showTab('ayarPage','tabAyar')"><span class="menu-icon">⚙</span><span class="menu-label">Ayarlar</span></button>
   </div>
@@ -36,6 +38,8 @@
         <button class="dashboard-card" onclick="showTab('unvanPage','tabUnvan')"><b>✎ Ünvan Düzeltici</b><span>Toplu ünvan düzenleme</span></button>
         <button class="dashboard-card" onclick="showTab('kdvPage','tabKdv')"><b>% KDV</b><span>Matrah ve KDV hesapla</span></button>
         <button class="dashboard-card" onclick="showTab('excelPage','tabExcel')"><b>▦ Excel Merkezi</b><span>Hazır formül ve örnekler</span></button>
+        <button class="dashboard-card" onclick="showTab('tcmbPage','tabTcmb')"><b>💱 TCMB Döviz</b><span>Tarihli kur ve çift yönlü çeviri</span></button>
+        <button class="dashboard-card" onclick="showTab('oneriPage','tabOneri')"><b>💡 İstek & Öneri</b><span>Hata ve özellik talebi gönder</span></button>
         <button class="dashboard-card" onclick="showTab('guncellemePage','tabGuncelleme')"><b>↻ Güncellemeler</b><span>Sürüm geçmişi</span></button>
       </div>
       <div id="dashboardUpdateStatus" class="update-status">Sürüm bilgisi yükleniyor...</div>
@@ -102,6 +106,35 @@
       <div class="excel-summary"><span id="excelCount">0 formül</span><button class="mini-button" onclick="clearExcelFilters()">Filtreyi Temizle</button></div>
       <div id="excelFormulaList" class="formula-list"></div>
       <div class="note">Formüller Türkçe Excel söz dizimine göre hazırlanmıştır. Hücre adreslerini kendi çalışma sayfana göre değiştir.</div>
+    </div>
+  </div>
+
+
+  <div id="tcmbPage" class="tab-page">
+    <div class="panel"><h2>TCMB Döviz Merkezi</h2>
+      <div class="helper-grid">
+        <div class="helper-col"><label>Kur Tarihi</label><input id="tcmbDate" type="date" onchange="loadTcmbRates()"></div>
+        <div class="helper-col"><label>Para Birimi</label><select id="tcmbCurrency" onchange="applyTcmbRate()"><option value="">Önce kuru getir</option></select></div>
+        <div class="helper-col"><label>Kur Türü</label><select id="tcmbRateType" onchange="applyTcmbRate()"><option value="forexBuying">Döviz Alış</option><option value="forexSelling" selected>Döviz Satış</option><option value="banknoteBuying">Efektif Alış</option><option value="banknoteSelling">Efektif Satış</option></select></div>
+      </div>
+      <div class="buttons"><button id="tcmbFetchButton" class="primary" onclick="loadTcmbRates()">TCMB'den Kuru Getir</button><button class="secondary" onclick="resetTcmbRate()">TCMB Kuruna Dön</button></div>
+      <div id="tcmbNotice" class="update-status">Tarih seçip TCMB kurunu getirebilirsin.</div>
+      <div class="section-title">Kur Bilgisi</div>
+      <div class="helper-grid"><div class="helper-col"><label>Seçilen Kur (1 birim için)</label><input id="tcmbRate" type="text" onkeyup="markTcmbManual();calculateTcmb()"></div><div class="helper-col"><label>Dönüşüm Yönü</label><select id="tcmbDirection" onchange="calculateTcmb()"><option value="foreignToTry">Döviz → TL</option><option value="tryToForeign">TL → Döviz</option></select></div><div class="helper-col"><label>KDV Oranı</label><select id="tcmbVatRate" onchange="calculateTcmb()"><option value="0">%0</option><option value="1">%1</option><option value="10">%10</option><option value="20" selected>%20</option></select></div></div>
+      <label id="tcmbAmountLabel">Döviz Tutarı</label><div class="amount-row"><input id="tcmbAmount" type="text" onkeyup="calculateTcmb()"><span id="tcmbAmountUnit" class="tl">Döviz</span></div>
+      <div class="result-grid"><div class="result"><div class="name">Matrah</div><div id="tcmbBaseResult" class="value">0,00 TL</div></div><div class="result"><div class="name">KDV</div><div id="tcmbVatResult" class="value">0,00 TL</div></div><div class="result full"><div class="name">Genel Toplam</div><div id="tcmbTotalResult" class="value">0,00 TL</div></div></div>
+      <div class="buttons"><button class="secondary" onclick="copyTcmbResult()">Sonucu Kopyala</button><button class="secondary" onclick="clearTcmb()">Temizle</button></div>
+      <div id="tcmbSourceInfo" class="note">Kaynak: Türkiye Cumhuriyet Merkez Bankası</div>
+    </div>
+  </div>
+
+  <div id="oneriPage" class="tab-page">
+    <div class="panel"><h2>İstek & Öneri Merkezi</h2>
+      <div class="helper-grid"><div class="helper-col"><label>Kategori</label><select id="suggestionCategory"><option>Özellik Önerisi</option><option>Hata Bildirimi</option><option>Yeni Hesaplama Aracı</option><option>Arayüz Önerisi</option><option>Diğer</option></select></div><div class="helper-col"><label>Ad / Firma (isteğe bağlı)</label><input id="suggestionName" type="text"></div></div>
+      <label>Başlık</label><input id="suggestionTitle" type="text" placeholder="Önerinizi kısa bir başlıkla yazın">
+      <label style="margin-top:9px">Açıklama</label><textarea id="suggestionBody" placeholder="İsteğinizi, önerinizi veya yaşadığınız sorunu ayrıntılı yazın..."></textarea>
+      <div class="buttons"><button class="primary" onclick="sendSuggestion()">GitHub Üzerinden Gönder</button><button class="secondary" onclick="clearSuggestion()">Temizle</button></div>
+      <div class="note">Gönder butonu GitHub üzerinde önceden doldurulmuş yeni bir bildirim açar. Göndermeden önce metni kontrol edebilirsin.</div>
     </div>
   </div>
 

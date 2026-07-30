@@ -1,0 +1,6 @@
+{
+  "id": "suggestions",
+  "name": "İstek ve Öneri Merkezi",
+  "version": "3.4.0",
+  "description": "GitHub Issues üzerinden hata ve özellik talebi gönderimi."
+}

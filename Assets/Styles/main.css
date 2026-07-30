@@ -115,3 +115,13 @@ input[type=text]:focus,select:focus{border-color:#38bdf8}
 .toast{max-width:330px;padding:11px 13px;border-radius:9px;border:1px solid #475569;background:#111827;color:#f8fafc;box-shadow:0 10px 28px rgba(0,0,0,.35);font-size:12px;font-weight:700;opacity:1;transform:translateY(0);transition:opacity .3s,transform .3s}
 .toast.success{border-color:#047857;background:#064e3b;color:#d1fae5}.toast.warning{border-color:#b45309;background:#78350f;color:#fef3c7}.toast.error{border-color:#b91c1c;background:#7f1d1d;color:#fee2e2}.toast.hide{opacity:0;transform:translateY(8px)}
 @media(max-width:560px){.update-center-row{align-items:flex-start;flex-direction:column}.install-update-button{width:100%}.toast-container{left:10px;right:10px;bottom:10px}.toast{max-width:none}}
+
+
+/* V3.4 TCMB ve İstek & Öneri */
+input[type=date]{width:100%;box-sizing:border-box;border:1px solid #475569;border-radius:9px;padding:9px 10px;background:#0f172a;color:#fff;font-size:16px;outline:none;color-scheme:dark}
+input[type=date]:focus{border-color:#38bdf8}
+.update-status.current{border-color:#047857;color:#d1fae5;background:#064e3b}
+.update-status.available{border-color:#b45309;color:#fef3c7;background:#78350f}
+.update-status.checking{border-color:#0369a1;color:#bae6fd;background:#0c4a6e}
+.update-status.error{border-color:#b91c1c;color:#fee2e2;background:#7f1d1d}
+#tcmbRate{font-family:Consolas,monospace}

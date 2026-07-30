@@ -1,0 +1,6 @@
+{
+  "id": "tcmb",
+  "name": "TCMB Döviz Merkezi",
+  "version": "3.4.0",
+  "description": "Tarihli TCMB kurları, kur türü seçimi ve çift yönlü dönüşüm."
+}

@@ -50,6 +50,71 @@ function fetchJson(url) {
   });
 }
 
+
+function fetchText(url) {
+  return new Promise((resolve, reject) => {
+    const request = https.get(url, {
+      headers: { 'User-Agent': 'AYK-Muhasebe-Yardimcisi/3.4' }
+    }, response => {
+      let body = '';
+      response.setEncoding('utf8');
+      response.on('data', chunk => { body += chunk; });
+      response.on('end', () => {
+        if (response.statusCode < 200 || response.statusCode >= 300) {
+          reject(new Error(`TCMB HTTP ${response.statusCode}`));
+          return;
+        }
+        resolve(body);
+      });
+    });
+    request.setTimeout(15000, () => request.destroy(new Error('TCMB isteği zaman aşımına uğradı.')));
+    request.on('error', reject);
+  });
+}
+
+function xmlValue(block, tag) {
+  const match = block.match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`, 'i'));
+  return match ? match[1].replace(/<!\[CDATA\[|\]\]>/g, '').trim() : '';
+}
+
+function parseTcmbXml(xml) {
+  const dateMatch = xml.match(/Tarih="([^"]+)"/i);
+  const currencyBlocks = xml.match(/<Currency\b[\s\S]*?<\/Currency>/gi) || [];
+  const currencies = currencyBlocks.map(block => {
+    const codeMatch = block.match(/CurrencyCode="([^"]+)"/i);
+    const unit = Number(xmlValue(block, 'Unit')) || 1;
+    const numberValue = tag => {
+      const raw = xmlValue(block, tag).replace(',', '.');
+      const n = Number(raw);
+      return Number.isFinite(n) ? n : null;
+    };
+    return {
+      code: codeMatch ? codeMatch[1] : '',
+      unit,
+      name: xmlValue(block, 'Isim') || xmlValue(block, 'CurrencyName'),
+      forexBuying: numberValue('ForexBuying'),
+      forexSelling: numberValue('ForexSelling'),
+      banknoteBuying: numberValue('BanknoteBuying'),
+      banknoteSelling: numberValue('BanknoteSelling')
+    };
+  }).filter(item => item.code);
+  return { sourceDate: dateMatch ? dateMatch[1] : '', currencies };
+}
+
+function tcmbUrlForDate(dateText) {
+  const parts = String(dateText || '').split('-');
+  if (parts.length !== 3) throw new Error('Geçersiz kur tarihi.');
+  const [year, month, day] = parts;
+  return `https://www.tcmb.gov.tr/kurlar/${year}${month}/${day}${month}${year}.xml`;
+}
+
+function isoDate(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1040,
@@ -147,6 +212,40 @@ ipcMain.handle('app:create-desktop-shortcut', () => {
   } catch (error) {
     log(`Shortcut error: ${error}`);
     return false;
+  }
+});
+
+
+ipcMain.handle('tcmb:get-rates', async (_event, requestedDate) => {
+  try {
+    const initial = /^\d{4}-\d{2}-\d{2}$/.test(String(requestedDate || ''))
+      ? new Date(`${requestedDate}T12:00:00`)
+      : new Date();
+    let lastError = null;
+    for (let offset = 0; offset <= 10; offset += 1) {
+      const candidate = new Date(initial);
+      candidate.setDate(candidate.getDate() - offset);
+      const date = isoDate(candidate);
+      try {
+        const xml = await fetchText(tcmbUrlForDate(date));
+        const parsed = parseTcmbXml(xml);
+        if (!parsed.currencies.length) throw new Error('TCMB kur listesi boş geldi.');
+        return {
+          ok: true,
+          requestedDate: isoDate(initial),
+          usedDate: date,
+          sourceDate: parsed.sourceDate,
+          fallbackDays: offset,
+          currencies: parsed.currencies
+        };
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    throw lastError || new Error('Kur bulunamadı.');
+  } catch (error) {
+    log(`TCMB error: ${error && error.stack ? error.stack : error}`);
+    return { ok: false, message: error && error.message ? error.message : String(error), currencies: [] };
   }
 });
 

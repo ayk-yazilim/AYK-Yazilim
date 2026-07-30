@@ -457,3 +457,60 @@ function renderReleaseHistory(){
   list.innerHTML=html;summary.innerText=shown+' sürüm gösteriliyor · Çalışan sürüm V'+(releaseCurrentVersion||currentVersion);
 }
 function openReleaseUrl(url){if(window.ayk&&window.ayk.openExternal)window.ayk.openExternal(url);}
+
+
+/* V3.4 TCMB Döviz Merkezi ve İstek & Öneri Merkezi */
+var tcmbState={currencies:[],selected:null,originalRate:0,manual:false,usedDate:'',requestedDate:'',sourceDate:'',fallbackDays:0};
+function todayIso(){var d=new Date(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return d.getFullYear()+'-'+m+'-'+day;}
+function tcmbRateLabel(type){return {forexBuying:'Döviz Alış',forexSelling:'Döviz Satış',banknoteBuying:'Efektif Alış',banknoteSelling:'Efektif Satış'}[type]||type;}
+function setTcmbNotice(text,kind){var el=document.getElementById('tcmbNotice');if(!el)return;el.className='update-status'+(kind?' '+kind:'');el.innerText=text;}
+async function loadTcmbRates(){
+  var date=document.getElementById('tcmbDate'),button=document.getElementById('tcmbFetchButton');
+  if(!date.value)date.value=todayIso();
+  if(!window.ayk||!window.ayk.getTcmbRates){setTcmbNotice('TCMB bağlantısı yalnızca Electron uygulamasında kullanılabilir.','error');return;}
+  button.disabled=true;button.innerText='Kur getiriliyor...';setTcmbNotice('TCMB kur bilgileri alınıyor...','checking');
+  try{
+    var result=await window.ayk.getTcmbRates(date.value);
+    if(!result||!result.ok)throw new Error(result&&result.message?result.message:'Kur alınamadı.');
+    tcmbState.currencies=result.currencies||[];tcmbState.usedDate=result.usedDate||date.value;tcmbState.requestedDate=result.requestedDate||date.value;tcmbState.sourceDate=result.sourceDate||'';tcmbState.fallbackDays=result.fallbackDays||0;
+    var select=document.getElementById('tcmbCurrency'),previous=select.value||'EUR',html='';
+    for(var i=0;i<tcmbState.currencies.length;i++){var c=tcmbState.currencies[i];html+='<option value="'+c.code+'">'+c.code+' - '+c.name+(c.unit>1?' ('+c.unit+' birim)':'')+'</option>';}
+    select.innerHTML=html;select.value=tcmbState.currencies.some(function(x){return x.code===previous;})?previous:(tcmbState.currencies.some(function(x){return x.code==='EUR';})?'EUR':tcmbState.currencies[0].code);
+    applyTcmbRate();
+    var fallback=tcmbState.fallbackDays>0?' Seçilen tarihte kur bulunmadığı için '+tcmbState.usedDate+' tarihli kur kullanıldı.':'';
+    setTcmbNotice('TCMB kurları başarıyla getirildi.'+fallback,tcmbState.fallbackDays>0?'available':'current');
+  }catch(error){setTcmbNotice('Kur alınamadı: '+error.message,'error');if(window.showToast)showToast('TCMB kuru alınamadı.','error');}
+  finally{button.disabled=false;button.innerText="TCMB'den Kuru Getir";}
+}
+function applyTcmbRate(){
+  var code=document.getElementById('tcmbCurrency').value,type=document.getElementById('tcmbRateType').value;
+  var c=null;for(var i=0;i<tcmbState.currencies.length;i++)if(tcmbState.currencies[i].code===code){c=tcmbState.currencies[i];break;}
+  tcmbState.selected=c;if(!c)return;
+  var raw=c[type],rate=raw===null||raw===undefined?0:raw/(c.unit||1);tcmbState.originalRate=rate;tcmbState.manual=false;
+  document.getElementById('tcmbRate').value=rate?rate.toFixed(6).replace('.',','):'';
+  document.getElementById('tcmbAmountUnit').innerText=document.getElementById('tcmbDirection').value==='foreignToTry'?code:'TL';
+  document.getElementById('tcmbSourceInfo').innerText='Kaynak: Türkiye Cumhuriyet Merkez Bankası | Kullanılan kur tarihi: '+tcmbState.usedDate+' | '+tcmbRateLabel(type)+' | Resmî birim: '+c.unit+' '+code;
+  if(!rate)setTcmbNotice(c.code+' için seçilen kur türü yayımlanmamış. Başka bir kur türü seçin.','available');
+  calculateTcmb();
+}
+function markTcmbManual(){tcmbState.manual=true;setTcmbNotice('Kur manuel olarak değiştirildi. Hesaplamada yazdığınız değer kullanılacak.','available');}
+function resetTcmbRate(){if(!tcmbState.originalRate)return;tcmbState.manual=false;document.getElementById('tcmbRate').value=tcmbState.originalRate.toFixed(6).replace('.',',');setTcmbNotice('TCMB tarafından getirilen kur yeniden uygulandı.','current');calculateTcmb();}
+function calculateTcmb(){
+  var direction=document.getElementById('tcmbDirection').value,code=document.getElementById('tcmbCurrency').value||'Döviz';
+  document.getElementById('tcmbAmountLabel').innerText=direction==='foreignToTry'?'Döviz Tutarı':'TL Tutarı';document.getElementById('tcmbAmountUnit').innerText=direction==='foreignToTry'?code:'TL';
+  var amount=parseNumber(document.getElementById('tcmbAmount').value),rate=parseNumber(document.getElementById('tcmbRate').value),vatRate=Number(document.getElementById('tcmbVatRate').value)||0;
+  var base=0;if(amount>0&&rate>0)base=direction==='foreignToTry'?amount*rate:amount/rate;var vat=base*vatRate/100,total=base+vat;
+  var unit=direction==='foreignToTry'?'TL':code;document.getElementById('tcmbBaseResult').innerText=formatMoney(base)+' '+unit;document.getElementById('tcmbVatResult').innerText=formatMoney(vat)+' '+unit;document.getElementById('tcmbTotalResult').innerText=formatMoney(total)+' '+unit;
+}
+function copyTcmbResult(){var code=document.getElementById('tcmbCurrency').value,type=tcmbRateLabel(document.getElementById('tcmbRateType').value),rate=document.getElementById('tcmbRate').value;var text='TCMB '+type+'\nKur Tarihi: '+tcmbState.usedDate+'\nPara Birimi: '+code+'\nKur: '+rate+' TL\nMatrah: '+document.getElementById('tcmbBaseResult').innerText+'\nKDV: '+document.getElementById('tcmbVatResult').innerText+'\nGenel Toplam: '+document.getElementById('tcmbTotalResult').innerText+(tcmbState.manual?'\nNot: Kur manuel değiştirildi.':'');copyText(text);}
+function clearTcmb(){document.getElementById('tcmbAmount').value='';document.getElementById('tcmbRate').value='';tcmbState.manual=false;calculateTcmb();setTcmbNotice('Alanlar temizlendi. Yeni kur getirebilirsin.','');}
+async function sendSuggestion(){
+  var category=document.getElementById('suggestionCategory').value,title=document.getElementById('suggestionTitle').value.trim(),body=document.getElementById('suggestionBody').value.trim(),name=document.getElementById('suggestionName').value.trim();
+  if(!title||!body){if(window.showToast)showToast('Başlık ve açıklama alanlarını doldurun.','warning');return;}
+  var version='3.4.0';try{if(window.ayk&&window.ayk.getVersion)version=await window.ayk.getVersion();}catch(_e){}
+  var issueTitle='['+category+'] '+title,issueBody='**Kategori:** '+category+'\n**Uygulama Sürümü:** V'+version+'\n**Ad / Firma:** '+(name||'Belirtilmedi')+'\n**Platform:** '+navigator.platform+'\n\n## Açıklama\n'+body;
+  var url='https://github.com/ayk-yazilim/AYK-Yazilim/issues/new?title='+encodeURIComponent(issueTitle)+'&body='+encodeURIComponent(issueBody);
+  if(window.ayk&&window.ayk.openExternal){var ok=await window.ayk.openExternal(url);if(!ok&&window.showToast)showToast('GitHub sayfası açılamadı.','error');}
+}
+function clearSuggestion(){document.getElementById('suggestionTitle').value='';document.getElementById('suggestionBody').value='';document.getElementById('suggestionName').value='';}
+(function initV34(){function run(){var date=document.getElementById('tcmbDate');if(date&&!date.value)date.value=todayIso();}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run);else run();})();
