@@ -463,6 +463,7 @@ function openReleaseUrl(url){if(window.ayk&&window.ayk.openExternal)window.ayk.o
 var tcmbState={currencies:[],selected:null,originalRate:0,manual:false,usedDate:'',requestedDate:'',sourceDate:'',fallbackDays:0};
 function todayIso(){var d=new Date(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return d.getFullYear()+'-'+m+'-'+day;}
 function tcmbRateLabel(type){return {forexBuying:'Döviz Alış',forexSelling:'Döviz Satış',banknoteBuying:'Efektif Alış',banknoteSelling:'Efektif Satış'}[type]||type;}
+function formatMoney(value){return Number(value||0).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function setTcmbNotice(text,kind){var el=document.getElementById('tcmbNotice');if(!el)return;el.className='update-status'+(kind?' '+kind:'');el.innerText=text;}
 async function loadTcmbRates(){
   var date=document.getElementById('tcmbDate'),button=document.getElementById('tcmbFetchButton');
@@ -498,7 +499,7 @@ function resetTcmbRate(){if(!tcmbState.originalRate)return;tcmbState.manual=fals
 function calculateTcmb(){
   var direction=document.getElementById('tcmbDirection').value,code=document.getElementById('tcmbCurrency').value||'Döviz';
   document.getElementById('tcmbAmountLabel').innerText=direction==='foreignToTry'?'Döviz Tutarı':'TL Tutarı';document.getElementById('tcmbAmountUnit').innerText=direction==='foreignToTry'?code:'TL';
-  var amount=parseNumber(document.getElementById('tcmbAmount').value),rate=parseNumber(document.getElementById('tcmbRate').value),vatRate=Number(document.getElementById('tcmbVatRate').value)||0;
+  var amount=parseAmount(document.getElementById('tcmbAmount').value),rate=parseAmount(document.getElementById('tcmbRate').value),vatRate=Number(document.getElementById('tcmbVatRate').value)||0;
   var base=0;if(amount>0&&rate>0)base=direction==='foreignToTry'?amount*rate:amount/rate;var vat=base*vatRate/100,total=base+vat;
   var unit=direction==='foreignToTry'?'TL':code;document.getElementById('tcmbBaseResult').innerText=formatMoney(base)+' '+unit;document.getElementById('tcmbVatResult').innerText=formatMoney(vat)+' '+unit;document.getElementById('tcmbTotalResult').innerText=formatMoney(total)+' '+unit;
 }
