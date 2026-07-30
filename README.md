@@ -1,4 +1,4 @@
-# AYK Muhasebe Yardımcısı V3.0
+# AYK Muhasebe Yardımcısı V3.4.0
 
 Electron tabanlı Windows masaüstü uygulaması. HTA, VBS ve ayrı PowerShell güncelleyicisi kullanılmaz.
 
